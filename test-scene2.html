@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镜头2测试 - 玉佩觉醒</title>
+    
+    <!-- 基础样式 -->
+    <link rel="stylesheet" href="styles/global.css">
+    <link rel="stylesheet" href="styles/ui-components.css">
+    <link rel="stylesheet" href="styles/scene2.css">
+    <link rel="stylesheet" href="styles/animations.css">
+    
+    <style>
+        /* 测试专用样式 */
+        .test-controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Microsoft YaHei', sans-serif;
+            font-size: 12px;
+            z-index: 999999;
+            min-width: 200px;
+        }
+        
+        .test-button {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #666;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        
+        .test-button:hover {
+            background: #555;
+        }
+        
+        .debug-info {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #666;
+            font-size: 10px;
+            opacity: 0.8;
+        }
+        
+        #scene-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <!-- 场景容器 -->
+    <div id="scene-container"></div>
+    
+    <!-- 测试控制面板 -->
+    <div class="test-controls">
+        <h4 style="margin: 0 0 10px 0; color: #ffcc00;">镜头2测试</h4>
+        
+        <button class="test-button" onclick="startScene2()">开始镜头2</button>
+        <button class="test-button" onclick="testN001()">测试N001播放</button>
+        <button class="test-button" onclick="testN002()">测试N002播放</button>
+        <button class="test-button" onclick="testN003()">测试N003播放</button>
+        <button class="test-button" onclick="testThunder()">测试雷声</button>
+        <button class="test-button" onclick="showButton()">显示激活按钮</button>
+        <button class="test-button" onclick="restartScene()">重启场景</button>
+        
+        <div class="debug-info">
+            <div>点击次数: <span id="click-count">0</span>/3</div>
+            <div>当前视频: <span id="current-video">无</span></div>
+            <div>状态: <span id="scene-status">未初始化</span></div>
+        </div>
+    </div>
+
+    <!-- 核心库 -->
+    <script src="scripts/utils/EventBus.js"></script>
+    <script src="scripts/utils/ResourceLoader.js"></script>
+    <script src="scripts/utils/DebugTools.js"></script>
+    
+    <!-- 配置文件 -->
+    <script src="config/global-config.js"></script>
+    <script src="config/audio-config.js"></script>
+    <script src="config/scene-config.js"></script>
+    
+    <!-- 核心系统 -->
+    <script src="scripts/core/AudioManager.js"></script>
+    <script src="scripts/core/SceneManager.js"></script>
+    <script src="scripts/core/InteractionManager.js"></script>
+    
+    <!-- 组件系统 -->
+    <script src="scripts/components/SubtitleSystem.js"></script>
+    <script src="scripts/components/EffectSystem.js"></script>
+    <script src="scripts/components/UIComponents.js"></script>
+    
+    <!-- 场景模块 -->
+    <script src="scripts/scenes/Scene1.js"></script>
+    <script src="scripts/scenes/Scene2.js"></script>
+
+    <script>
+        let scene2Instance = null;
+        let testClickCount = 0;
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🧪 镜头2测试页面加载完成');
+            
+            // 初始化事件总线
+            if (window.EventBus) {
+                console.log('✅ EventBus已就绪');
+            }
+            
+            // 初始化音频管理器
+            if (window.AudioManager) {
+                await window.AudioManager.initialize();
+                console.log('✅ AudioManager已初始化');
+            }
+            
+            updateStatus('已就绪');
+        });
+        
+        // 开始镜头2
+        async function startScene2() {
+            console.log('🎬 开始镜头2测试');
+            
+            try {
+                updateStatus('启动中...');
+                
+                // 获取场景配置
+                const scene2Config = window.SceneConfig?.scene2;
+                if (!scene2Config) {
+                    throw new Error('镜头2配置未找到');
+                }
+                
+                // 创建场景实例
+                scene2Instance = new window.Scene2(scene2Config);
+                
+                // 初始化场景
+                await scene2Instance.initialize();
+                
+                updateStatus('运行中');
+                console.log('✅ 镜头2启动成功');
+                
+                // 监听状态变化
+                setInterval(updateDebugInfo, 1000);
+                
+            } catch (error) {
+                console.error('❌ 镜头2启动失败:', error);
+                updateStatus('启动失败');
+                alert('镜头2启动失败: ' + error.message);
+            }
+        }
+        
+        // 测试N001播放
+        function testN001() {
+            if (scene2Instance) {
+                scene2Instance.step1_PlayN001();
+                updateCurrentVideo('N001');
+            }
+        }
+        
+        // 测试N002播放
+        function testN002() {
+            if (scene2Instance) {
+                scene2Instance.step2_PlayN002();
+                updateCurrentVideo('N002');
+            }
+        }
+        
+        // 测试N003播放
+        function testN003() {
+            if (scene2Instance) {
+                scene2Instance.playN003();
+                updateCurrentVideo('N003');
+            }
+        }
+        
+        // 测试雷声
+        function testThunder() {
+            if (window.AudioManager) {
+                window.AudioManager.playAmbient('thunder');
+                console.log('🌩️ 雷声测试播放');
+            }
+        }
+        
+        // 显示激活按钮
+        function showButton() {
+            if (scene2Instance) {
+                scene2Instance.showActivateButton();
+                console.log('🎯 激活按钮已显示');
+            }
+        }
+        
+        // 重启场景
+        function restartScene() {
+            if (scene2Instance) {
+                scene2Instance.cleanup();
+                scene2Instance = null;
+            }
+            
+            // 清理容器
+            const container = document.getElementById('scene-container');
+            if (container) {
+                container.innerHTML = '';
+            }
+            
+            updateStatus('已重置');
+            updateCurrentVideo('无');
+            updateClickCount(0);
+            
+            console.log('🔄 场景已重置');
+        }
+        
+        // 更新状态显示
+        function updateStatus(status) {
+            document.getElementById('scene-status').textContent = status;
+        }
+        
+        function updateCurrentVideo(video) {
+            document.getElementById('current-video').textContent = video;
+        }
+        
+        function updateClickCount(count) {
+            testClickCount = count;
+            document.getElementById('click-count').textContent = count;
+        }
+        
+        // 更新调试信息
+        function updateDebugInfo() {
+            if (scene2Instance) {
+                const status = scene2Instance.getStatus();
+                updateClickCount(status.clickCount);
+                updateCurrentVideo(status.currentVideo || '无');
+                
+                if (status.isWaitingForClicks) {
+                    updateStatus('等待点击');
+                } else {
+                    updateStatus('运行中');
+                }
+            }
+        }
+        
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case '1':
+                    startScene2();
+                    break;
+                case '2':
+                    testN001();
+                    break;
+                case '3':
+                    testN002();
+                    break;
+                case '4':
+                    testN003();
+                    break;
+                case '5':
+                    testThunder();
+                    break;
+                case '6':
+                    showButton();
+                    break;
+                case 'r':
+                case 'R':
+                    restartScene();
+                    break;
+            }
+        });
+        
+        // 全局错误处理
+        window.addEventListener('error', (e) => {
+            console.error('❌ 全局错误:', e.error);
+            updateStatus('错误');
+        });
+        
+        // 导出到全局以便调试
+        window.testScene2 = {
+            instance: () => scene2Instance,
+            start: startScene2,
+            restart: restartScene,
+            testN001,
+            testN002,
+            testN003,
+            testThunder,
+            showButton
+        };
+        
+        console.log('🧪 镜头2测试API已就绪: window.testScene2');
+        console.log('🎮 快捷键: 1=开始, 2=N001, 3=N002, 4=N003, 5=雷声, 6=按钮, R=重启');
+    </script>
+</body>
+</html> 

@@ -1,0 +1,2506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镜头2简化测试</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            overflow: hidden;
+            font-family: 'Microsoft YaHei', sans-serif;
+            cursor: crosshair;
+        }
+        
+        #scene2-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            overflow: hidden;
+        }
+        
+        #video-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #ui-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        .scene2-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        /* 圆形波动按钮 */
+        .activate-button {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 70%, transparent 100%);
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            z-index: 999999;
+            opacity: 0;
+            animation: rippleButton 2s infinite;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            pointer-events: auto;
+        }
+        
+        .activate-button::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            animation: rippleWave 2s infinite;
+            z-index: -1;
+        }
+        
+        .activate-button::after {
+            content: '';
+            position: absolute;
+            width: 120%;
+            height: 120%;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: rippleWave 2s infinite 0.5s;
+            z-index: -2;
+        }
+        
+        .button-text {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            text-align: center;
+            pointer-events: none;
+        }
+        
+        .activate-button:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 70%, transparent 100%);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* 动画 */
+        @keyframes rippleButton {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1); 
+                opacity: 0.8; 
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.05); 
+                opacity: 1; 
+            }
+        }
+        
+        @keyframes rippleWave {
+            0% { 
+                transform: scale(1); 
+                opacity: 0.6; 
+            }
+            50% { 
+                transform: scale(1.3); 
+                opacity: 0.3; 
+            }
+            100% { 
+                transform: scale(1.6); 
+                opacity: 0; 
+            }
+        }
+        
+        @keyframes clickRipple {
+            0% {
+                width: 20px;
+                height: 20px;
+                opacity: 0.8;
+            }
+            50% {
+                width: 60px;
+                height: 60px;
+                opacity: 0.4;
+            }
+            100% {
+                width: 100px;
+                height: 100px;
+                opacity: 0;
+            }
+        }
+        
+        /* 控制面板 */
+        .controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            z-index: 999999;
+            min-width: 200px;
+        }
+        
+        .control-button {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #666;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        
+        .control-button:hover {
+            background: #555;
+        }
+        
+        .status {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #666;
+            font-size: 10px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <!-- 场景容器 -->
+    <div id="scene2-container">
+        <!-- 视频播放区域 -->
+        <div id="video-container">
+            <!-- 视频会动态插入这里 -->
+        </div>
+        
+        <!-- UI容器 -->
+        <div id="ui-container">
+            <!-- 按钮会动态插入这里 -->
+        </div>
+    </div>
+    
+    <!-- 控制面板 -->
+    <div class="controls" id="debug-controls">
+        <h4 style="margin: 0 0 10px 0; color: #ffcc00;">镜头2简化测试</h4>
+        
+        <button class="control-button" onclick="startScene2()">开始镜头2</button>
+        <button class="control-button" onclick="testN001()">播放N001</button>
+        <button class="control-button" onclick="testN002()">播放N002</button>
+        <button class="control-button" onclick="testN003()">播放N003</button>
+        <button class="control-button" onclick="playThunder()">播放雷声</button>
+        <button class="control-button" onclick="stopThunder()">停止雷声</button>
+        <button class="control-button" onclick="testThunderOnly()">仅测试雷声</button>
+        <button class="control-button" onclick="showButton()">显示按钮</button>
+        <button class="control-button" onclick="triggerCompletion()">🚀 触发完成</button>
+        <button class="control-button" onclick="resetAll()">重置</button>
+        
+        <div class="status">
+            <div>点击次数: <span id="click-count">0</span>/3</div>
+            <div>当前视频: <span id="current-video">无</span></div>
+            <div>状态: <span id="status">就绪</span></div>
+        </div>
+    </div>
+
+    <script>
+        // 简化的镜头2实现
+        class SimpleScene2 {
+            constructor() {
+                this.currentVideo = null;
+                this.clickCount = 0;
+                this.requiredClicks = 3;
+                this.isWaitingForClicks = false;
+                this.thunderAudio = null;
+                this.s02002Audio = null;
+                this.audioUnlocked = false; // 音频解锁状态
+                this.pendingAudioActions = []; // 待执行的音频操作
+                this.activationHandled = false; // 防止重复激活处理
+                
+                this.videoContainer = document.getElementById('video-container');
+                this.uiContainer = document.getElementById('ui-container');
+                
+                console.log('🎬 简化镜头2初始化');
+                
+                // 检查是否在iframe中运行，如果是则隐藏控制面板
+                if (window.parent !== window) {
+                    const debugControls = document.getElementById('debug-controls');
+                    if (debugControls) {
+                        debugControls.style.display = 'none';
+                        console.log('🖥️ 在iframe中运行，已隐藏调试控制面板');
+                    }
+                }
+                
+                // 监听音频解锁事件
+                this.setupAudioUnlockListener();
+            }
+            
+            // 设置音频解锁监听器
+            setupAudioUnlockListener() {
+                // 检测是否在iframe中
+                const isInIframe = window.parent !== window;
+                
+                if (isInIframe) {
+                    // 在iframe中，监听父窗口的音频解锁信号
+                    window.addEventListener('message', (event) => {
+                        if (event.data.type === 'audio-unlocked') {
+                            console.log('🎵 收到音频解锁信号');
+                            this.audioUnlocked = true;
+                            
+                            console.log('🎵 音频已解锁，等待镜头2真正激活时再开始播放');
+                            // 不再自动启动，等待镜头真正激活
+                        }
+                    });
+                    
+                    // 请求音频状态
+                    window.parent.postMessage({
+                        type: 'request-audio-status'
+                    }, '*');
+                } else {
+                    // 独立运行时，假设音频已解锁
+                    this.audioUnlocked = true;
+                }
+            }
+            
+            // 执行待处理的音频操作
+            executePendingAudioActions() {
+                // 只有在镜头2活跃时才执行音频操作
+                if (!this.isCurrentlyActiveScene()) {
+                    console.log('🎵 镜头2非活跃状态，不执行待处理的音频操作');
+                    return;
+                }
+                
+                console.log(`🎵 执行 ${this.pendingAudioActions.length} 个待处理的音频操作`);
+                this.pendingAudioActions.forEach(action => {
+                    action();
+                });
+                this.pendingAudioActions = [];
+            }
+            
+            // 检查镜头2是否为当前活跃镜头
+            isCurrentlyActiveScene() {
+                const isInIframe = window.parent !== window;
+                if (!isInIframe) {
+                    // 独立运行时，认为是活跃的
+                    return true;
+                }
+                
+                try {
+                    // 检查iframe是否可见
+                    const iframe = window.frameElement;
+                    if (!iframe) return false;
+                    
+                    // 检查iframe的父容器是否有active类
+                    const frameContainer = iframe.parentElement;
+                    if (frameContainer && frameContainer.classList.contains('active')) {
+                        return true;
+                    }
+                    
+                    return false;
+                } catch (e) {
+                    console.warn('无法检查iframe状态:', e);
+                    return false;
+                }
+            }
+            
+            // 设置激活状态监听器
+            setupActivationMonitor() {
+                const isInIframe = window.parent !== window;
+                if (!isInIframe) return;
+                
+                console.log('🔍 设置镜头2激活状态监听器');
+                
+                // 定期检查激活状态
+                const checkActivation = () => {
+                    const wasActive = this.wasActive || false;
+                    const isActive = this.isCurrentlyActiveScene();
+                    
+                    if (!wasActive && isActive) {
+                        console.log('🎯 镜头2刚刚激活！');
+                        this.onSceneActivated();
+                    }
+                    
+                    this.wasActive = isActive;
+                };
+                
+                // 每200ms检查一次
+                setInterval(checkActivation, 200);
+            }
+            
+            // 镜头激活时的处理
+            onSceneActivated() {
+                // 防止重复激活
+                if (this.activationHandled) {
+                    console.log('🎯 镜头2激活事件已处理过，跳过重复处理');
+                    return;
+                }
+                
+                console.log('🎯 处理镜头2激活事件');
+                this.activationHandled = true;
+                
+                // 镜头2真正激活时，先显示黑屏转场，然后开始播放N001
+                if (!this.currentVideo) {
+                    console.log('🎬 镜头2激活，开始转场到N001');
+                    this.transitionToN001();
+                }
+                
+                // 如果音频已解锁且有待处理的音频操作，执行它们
+                if (this.audioUnlocked && this.pendingAudioActions.length > 0) {
+                    console.log('🎵 镜头2激活，执行待处理的音频操作');
+                    this.executePendingAudioActions();
+                }
+                
+                // 如果当前正在播放N002，启动音效
+                if (this.currentVideo && this.currentVideo.src.includes('N002')) {
+                    if (this.audioUnlocked && !this.s02002Audio && !this.thunderAudio) {
+                        console.log('🎵 镜头2激活，N002正在播放，启动音效');
+                        this.playS02002();
+                        this.startThunder();
+                    }
+                }
+            }
+            
+            // 镜头1到N001的转场特效（黑衣人步步逼近）
+            transitionToN001() {
+                console.log('🎬 执行镜头1→N001转场特效（黑衣人步步逼近）');
+                
+                // 创建转场容器
+                const transitionContainer = document.createElement('div');
+                transitionContainer.className = 'scene1-n001-transition';
+                transitionContainer.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: rgba(0, 0, 0, 1);
+                    z-index: 99999;
+                    opacity: 1;
+                    pointer-events: none;
+                `;
+                
+                document.body.appendChild(transitionContainer);
+                
+                // 第一阶段：显示"黑衣人转向镜头"
+                this.showTransitionImage(transitionContainer, '镜头2/黑衣人转向镜头.png', 2000, () => {
+                    console.log('🎬 第一阶段：黑衣人转向镜头');
+                });
+                
+                // 第二阶段：显示"步步逼近"
+                setTimeout(() => {
+                    this.showTransitionImage(transitionContainer, '镜头2/步步逼近.png', 2000, () => {
+                        console.log('🎬 第二阶段：步步逼近');
+                    });
+                }, 2000);
+                
+                // 第三阶段：开始播放N001
+                setTimeout(() => {
+                    console.log('🎬 第三阶段：开始播放N001');
+                    this.start();
+                    
+                    // 淡出转场容器
+                    transitionContainer.style.transition = 'opacity 1s ease-in-out';
+                    transitionContainer.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        if (transitionContainer.parentNode) {
+                            transitionContainer.remove();
+                        }
+                        console.log('🎬 镜头1→N001转场完成');
+                    }, 1000);
+                }, 4000);
+            }
+            
+            // 显示转场图片的辅助函数
+            showTransitionImage(container, imageSrc, duration, callback) {
+                // 创建图片元素
+                const img = document.createElement('img');
+                img.src = imageSrc;
+                img.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    max-width: 90%;
+                    max-height: 90%;
+                    object-fit: contain;
+                    opacity: 0;
+                    transition: opacity 0.8s ease-in-out;
+                `;
+                
+                container.appendChild(img);
+                
+                // 图片加载完成后淡入
+                img.onload = () => {
+                    setTimeout(() => {
+                        img.style.opacity = '1';
+                        if (callback) callback();
+                    }, 100);
+                };
+                
+                // 错误处理
+                img.onerror = () => {
+                    console.warn(`⚠️ 转场图片加载失败: ${imageSrc}`);
+                    if (callback) callback();
+                };
+                
+                // 在指定时间后淡出并移除
+                setTimeout(() => {
+                    img.style.opacity = '0';
+                    setTimeout(() => {
+                        if (img.parentNode) {
+                            img.remove();
+                        }
+                    }, 800);
+                }, duration - 800);
+            }
+            
+            // 显示视频错误信息
+            showVideoError(message) {
+                console.error('🚨 显示视频错误:', message);
+                this.updateStatus(`错误: ${message}`);
+                
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(255, 0, 0, 0.8);
+                    color: white;
+                    padding: 20px;
+                    border-radius: 10px;
+                    text-align: center;
+                    z-index: 1000;
+                `;
+                errorDiv.innerHTML = `
+                    <h3>⚠️ 视频加载错误</h3>
+                    <p>${message}</p>
+                    <button onclick="location.reload()" style="margin-top: 10px; padding: 5px 10px;">刷新页面</button>
+                `;
+                
+                this.videoContainer.appendChild(errorDiv);
+            }
+            
+
+            
+            // N001到N002的转场特效（N001渐暗→N002从暗渐亮）- 优化版本
+            transitionFromN001ToN002() {
+                console.log('🎬 执行N001→N002直接转场（渐暗→从暗渐亮+震撼效果）');
+                
+                // 先让N001渐暗，然后直接切换到N002（带从暗渐亮效果）
+                this.fadeOutToN002();
+            }
+            
+            // 当前视频渐暗（回调版本）
+            fadeOutCurrentVideo(callback) {
+                if (!this.currentVideo) {
+                    if (callback) callback();
+                    return;
+                }
+                
+                console.log('🎬 N001视频开始渐暗（加速）');
+                
+                // 创建渐暗遮罩
+                const fadeOverlay = document.createElement('div');
+                fadeOverlay.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0);
+                    z-index: 10;
+                    transition: background 0.75s ease-out;
+                    pointer-events: none;
+                `;
+                
+                this.videoContainer.appendChild(fadeOverlay);
+                
+                // 开始渐暗
+                setTimeout(() => {
+                    fadeOverlay.style.background = 'rgba(0, 0, 0, 1)';
+                }, 50);
+                
+                // 0.75秒后完成渐暗，执行回调
+                setTimeout(() => {
+                    if (callback) callback();
+                    // 移除渐暗遮罩
+                    setTimeout(() => {
+                        if (fadeOverlay.parentNode) {
+                            fadeOverlay.remove();
+                        }
+                    }, 250);
+                }, 800);
+            }
+            
+            // 当前视频渐暗（并行版本，无回调）
+            fadeOutCurrentVideoParallel() {
+                if (!this.currentVideo) {
+                    return;
+                }
+                
+                console.log('🎬 N001视频开始并行渐暗');
+                
+                // 创建渐暗遮罩
+                const fadeOverlay = document.createElement('div');
+                fadeOverlay.className = 'parallel-fade-overlay';
+                fadeOverlay.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0);
+                    z-index: 10;
+                    transition: background 0.6s ease-out;
+                    pointer-events: none;
+                `;
+                
+                this.videoContainer.appendChild(fadeOverlay);
+                
+                // 立即开始渐暗
+                setTimeout(() => {
+                    fadeOverlay.style.background = 'rgba(0, 0, 0, 1)';
+                }, 50);
+                
+                // 0.8秒后移除遮罩
+                setTimeout(() => {
+                    if (fadeOverlay.parentNode) {
+                        fadeOverlay.remove();
+                    }
+                    console.log('🎬 并行渐暗完成');
+                }, 800);
+            }
+
+            // 当前视频渐暗（加速版本）- 速度提升3倍
+            fadeOutCurrentVideoParallelFast() {
+                if (!this.currentVideo) {
+                    return;
+                }
+                
+                console.log('🎬 N001视频开始快速并行渐暗（3倍速）');
+                
+                // 创建渐暗遮罩
+                const fadeOverlay = document.createElement('div');
+                fadeOverlay.className = 'parallel-fade-overlay-fast';
+                fadeOverlay.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0);
+                    z-index: 10;
+                    transition: background 0.2s ease-out;
+                    pointer-events: none;
+                `;
+                
+                this.videoContainer.appendChild(fadeOverlay);
+                
+                // 立即开始渐暗
+                setTimeout(() => {
+                    fadeOverlay.style.background = 'rgba(0, 0, 0, 1)';
+                }, 20);
+                
+                // 0.25秒后移除遮罩
+                setTimeout(() => {
+                    if (fadeOverlay.parentNode) {
+                        fadeOverlay.remove();
+                    }
+                    console.log('🎬 快速并行渐暗完成');
+                }, 250);
+            }
+
+            // N001渐暗后直接切换到N002（去掉红光转场）
+            fadeOutToN002() {
+                if (!this.currentVideo) {
+                    this.playN002Fast();
+                    return;
+                }
+                
+                console.log('🎬 N001开始渐暗，准备直接切换到N002');
+                
+                // 创建渐暗遮罩（保留在视频容器中，作为N002的暗背景）
+                const fadeOverlay = document.createElement('div');
+                fadeOverlay.className = 'fade-to-n002-overlay';
+                fadeOverlay.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0);
+                    z-index: 10;
+                    transition: background 0.3s ease-out;
+                    pointer-events: none;
+                `;
+                
+                this.videoContainer.appendChild(fadeOverlay);
+                
+                // 开始渐暗
+                setTimeout(() => {
+                    fadeOverlay.style.background = 'rgba(0, 0, 0, 1)';
+                }, 50);
+                
+                // 在渐暗完成时切换到N002（N002会从这个暗背景开始从暗渐亮）
+                setTimeout(() => {
+                    console.log('🎬 N001渐暗完成，直接切换到N002（从暗渐亮）');
+                    this.playN002WithDarkToLight();
+                    
+                    // 不立即移除遮罩，让N002的从暗渐亮效果接管
+                }, 350);
+            }
+            
+            // 播放N002（从暗渐亮版本，带震撼效果）
+            playN002WithDarkToLight() {
+                // 防止重复播放 - 更严格的检查
+                if (this.currentVideo && this.currentVideo.src.includes('N002') && !this.currentVideo.paused) {
+                    console.log('🎬 N002已在播放中，跳过重复播放');
+                    return;
+                }
+                
+                // 检查是否已经有N002视频在播放
+                const existingN002 = this.videoContainer.querySelector('video[src*="N002"]');
+                if (existingN002 && !existingN002.paused) {
+                    console.log('🎬 检测到现有N002视频在播放，跳过重复创建');
+                    this.currentVideo = existingN002;
+                    return;
+                }
+                
+                this.updateCurrentVideo('N002');
+                this.updateStatus('播放N002（从暗渐亮+震撼）');
+                
+                console.log('🎬 开始播放N002（从暗渐亮+震撼效果）');
+                
+                const video = this.createVideo('镜头2/N002.mp4');
+                video.loop = true;
+                
+                // 创建从暗渐亮的震撼效果（接管之前的暗背景）
+                this.createDarkToLightTransition(video);
+                
+                // 开始播放时播放音效和雷声
+                video.addEventListener('playing', () => {
+                    console.log('🎬 N002从暗渐亮版开始播放，检查是否应该启动音效和雷声');
+                    if (this.isCurrentlyActiveScene()) {
+                        console.log('🎬 镜头2处于活跃状态，启动音效和雷声');
+                        this.playS02002();
+                        this.startThunder();
+                    } else {
+                        console.log('🎬 镜头2非活跃状态，不播放音效');
+                    }
+                    
+                    // 播放1秒后显示激活按钮
+                    setTimeout(() => {
+                        if (!this.isWaitingForClicks) {
+                            console.log('🎬 N002从暗渐亮版播放中，显示激活按钮');
+                            this.showActivateButton();
+                        }
+                    }, 1000);
+                }, { once: true });
+                
+                // 备用：首次循环结束时也尝试显示按钮
+                video.addEventListener('ended', () => {
+                    if (!this.isWaitingForClicks) {
+                        console.log('🎬 N002循环结束，确保激活按钮显示');
+                        this.showActivateButton();
+                    }
+                });
+                
+                this.setCurrentVideo(video);
+            }
+            
+            // 显示微弱红光转场（串行版本）
+            showWeakRedTransition() {
+                console.log('🎬 显示微弱红光转场（加速）');
+                
+                // 创建转场遮罩
+                const overlay = document.createElement('div');
+                overlay.className = 'n001-n002-transition';
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: rgba(0, 0, 0, 1);
+                    z-index: 99999;
+                    opacity: 1;
+                    pointer-events: none;
+                `;
+                
+                // 添加微弱红光效果
+                const redGlow = document.createElement('div');
+                redGlow.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 200px;
+                    height: 200px;
+                    background: radial-gradient(circle, rgba(255,0,0,0.3) 0%, rgba(255,0,0,0.15) 30%, transparent 70%);
+                    border-radius: 50%;
+                    animation: weakRedPulse 1.2s ease-in-out infinite;
+                `;
+                
+                overlay.appendChild(redGlow);
+                document.body.appendChild(overlay);
+                
+                // 添加CSS动画
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes weakRedPulse {
+                        0% { 
+                            transform: translate(-50%, -50%) scale(0.9);
+                            opacity: 0.2;
+                        }
+                        50% { 
+                            transform: translate(-50%, -50%) scale(1.1);
+                            opacity: 0.4;
+                        }
+                        100% { 
+                            transform: translate(-50%, -50%) scale(0.9);
+                            opacity: 0.2;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // 在红光显示0.75秒后切换到N002
+                setTimeout(() => {
+                    console.log('🎬 红光转场中期，切换到N002');
+                    this.playN002();
+                }, 750);
+                
+                // 转场结束，淡出红光
+                setTimeout(() => {
+                    overlay.style.transition = 'opacity 0.5s ease-out';
+                    overlay.style.opacity = '0';
+                    setTimeout(() => {
+                        if (overlay.parentNode) {
+                            overlay.remove();
+                        }
+                        if (style.parentNode) {
+                            style.remove();
+                        }
+                        console.log('🎬 N001→N002转场完成');
+                    }, 500);
+                }, 1250);
+            }
+            
+            // 显示微弱红光转场（并行版本）
+            showWeakRedTransitionParallel() {
+                console.log('🎬 显示并行微弱红光转场');
+                
+                // 0.3秒延迟后开始红光，让渐暗先进行一点
+                setTimeout(() => {
+                    // 创建转场遮罩
+                    const overlay = document.createElement('div');
+                    overlay.className = 'n001-n002-parallel-transition';
+                    overlay.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100vw;
+                        height: 100vh;
+                        background: rgba(0, 0, 0, 0);
+                        z-index: 99999;
+                        opacity: 0;
+                        transition: all 0.4s ease-in-out;
+                        pointer-events: none;
+                    `;
+                    
+                    // 添加微弱红光效果
+                    const redGlow = document.createElement('div');
+                    redGlow.style.cssText = `
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        width: 200px;
+                        height: 200px;
+                        background: radial-gradient(circle, rgba(255,0,0,0.3) 0%, rgba(255,0,0,0.15) 30%, transparent 70%);
+                        border-radius: 50%;
+                        animation: weakRedPulseParallel 1s ease-in-out infinite;
+                    `;
+                    
+                    overlay.appendChild(redGlow);
+                    document.body.appendChild(overlay);
+                    
+                    // 添加CSS动画
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        @keyframes weakRedPulseParallel {
+                            0% { 
+                                transform: translate(-50%, -50%) scale(0.9);
+                                opacity: 0.3;
+                            }
+                            50% { 
+                                transform: translate(-50%, -50%) scale(1.1);
+                                opacity: 0.5;
+                            }
+                            100% { 
+                                transform: translate(-50%, -50%) scale(0.9);
+                                opacity: 0.3;
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    
+                    // 立即显示红光效果
+                    setTimeout(() => {
+                        overlay.style.background = 'rgba(0, 0, 0, 0.8)';
+                        overlay.style.opacity = '1';
+                    }, 50);
+                    
+                    // 0.5秒后切换到N002
+                    setTimeout(() => {
+                        console.log('🎬 并行红光转场中期，切换到N002');
+                        this.playN002();
+                    }, 500);
+                    
+                    // 转场结束，淡出红光
+                    setTimeout(() => {
+                        overlay.style.opacity = '0';
+                        setTimeout(() => {
+                            if (overlay.parentNode) {
+                                overlay.remove();
+                            }
+                            if (style.parentNode) {
+                                style.remove();
+                            }
+                            console.log('🎬 并行N001→N002转场完成');
+                        }, 400);
+                    }, 1000);
+                }, 300); // 0.3秒延迟开始红光
+            }
+
+            // 显示微弱红光转场（加速版本）- 速度提升3倍，加震撼效果
+            showWeakRedTransitionParallelFast() {
+                console.log('🎬 显示快速并行红光转场（3倍速+震撼效果）');
+                
+                // 缩短延迟到0.1秒
+                setTimeout(() => {
+                    // 创建转场遮罩
+                    const overlay = document.createElement('div');
+                    overlay.className = 'n001-n002-parallel-transition-fast';
+                    overlay.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100vw;
+                        height: 100vh;
+                        background: rgba(0, 0, 0, 0);
+                        z-index: 99999;
+                        opacity: 0;
+                        transition: all 0.15s ease-in-out;
+                        pointer-events: none;
+                    `;
+                    
+                    // 添加增强红光效果
+                    const redGlow = document.createElement('div');
+                    redGlow.style.cssText = `
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        width: 250px;
+                        height: 250px;
+                        background: radial-gradient(circle, rgba(255,0,0,0.5) 0%, rgba(255,0,0,0.25) 30%, transparent 70%);
+                        border-radius: 50%;
+                        animation: shockRedPulseFast 0.3s ease-in-out infinite;
+                    `;
+                    
+                    overlay.appendChild(redGlow);
+                    document.body.appendChild(overlay);
+                    
+                    // 添加加速CSS动画和震撼效果
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        @keyframes shockRedPulseFast {
+                            0% { 
+                                transform: translate(-50%, -50%) scale(0.7);
+                                opacity: 0.4;
+                            }
+                            50% { 
+                                transform: translate(-50%, -50%) scale(1.3);
+                                opacity: 0.7;
+                            }
+                            100% { 
+                                transform: translate(-50%, -50%) scale(0.7);
+                                opacity: 0.4;
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    
+                    // 立即显示红光效果
+                    setTimeout(() => {
+                        overlay.style.background = 'rgba(0, 0, 0, 0.9)';
+                        overlay.style.opacity = '1';
+                    }, 20);
+                    
+                    // 0.15秒后切换到N002（加速版本）
+                    setTimeout(() => {
+                        console.log('🎬 快速红光转场中期，切换到N002');
+                        this.playN002Fast(); // 调用加速版N002播放
+                    }, 150);
+                    
+                    // 转场结束，快速淡出红光
+                    setTimeout(() => {
+                        overlay.style.opacity = '0';
+                        setTimeout(() => {
+                            if (overlay.parentNode) {
+                                overlay.remove();
+                            }
+                            if (style.parentNode) {
+                                style.remove();
+                            }
+                            console.log('🎬 快速N001→N002转场完成');
+                        }, 150);
+                    }, 350);
+                }, 100); // 0.1秒延迟开始红光
+            }
+            
+            // N002到N003的转场特效（快速黑屏渐隐，优化N003可见性）
+            transitionFromN002ToN003() {
+                console.log('🎬 执行N002→N003转场特效（快速黑屏渐隐，优化N003可见性）');
+                
+                // 创建快速黑屏转场遮罩
+                const overlay = document.createElement('div');
+                overlay.className = 'n002-n003-transition-optimized';
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: rgba(0, 0, 0, 1);
+                    z-index: 99999;
+                    opacity: 0;
+                    transition: opacity 0.4s ease-in-out;
+                    pointer-events: none;
+                `;
+                
+                document.body.appendChild(overlay);
+                
+                // 快速开始转场
+                setTimeout(() => {
+                    overlay.style.opacity = '1';
+                }, 50);
+                
+                // 在转场早期切换到N003（提前切换，确保N003有足够时间显示）
+                setTimeout(() => {
+                    console.log('🎬 快速转场，提前切换到N003');
+                    this.playN003();
+                }, 250);
+                
+                // 快速结束转场，让N003画面尽早可见
+                setTimeout(() => {
+                    overlay.style.transition = 'opacity 0.3s ease-out';
+                    overlay.style.opacity = '0';
+                    setTimeout(() => {
+                        if (overlay.parentNode) {
+                            overlay.remove();
+                        }
+                        console.log('🎬 N002→N003快速转场完成，N003画面可见');
+                    }, 300);
+                }, 500);
+            }
+            
+            // 开始场景
+            start() {
+                console.log('🎬 开始镜头2');
+                this.updateStatus('启动中...');
+                this.playN001();
+            }
+            
+            // 播放N001
+            playN001() {
+                // 防止重复播放 - 更严格的检查
+                if (this.currentVideo && this.currentVideo.src.includes('N001') && !this.currentVideo.paused) {
+                    console.log('🎬 N001已在播放中，跳过重复播放');
+                    return;
+                }
+                
+                // 检查是否已经有N001视频在播放
+                const existingN001 = this.videoContainer.querySelector('video[src*="N001"]');
+                if (existingN001 && !existingN001.paused) {
+                    console.log('🎬 检测到现有N001视频在播放，跳过重复创建');
+                    this.currentVideo = existingN001; // 确保currentVideo指向正确的视频
+                    return;
+                }
+                
+                this.updateCurrentVideo('N001');
+                this.updateStatus('播放N001');
+                
+                console.log('🎬 开始播放N001');
+                
+                // N001开始播放（移除了调试通知）
+                
+                const video = this.createVideo('镜头2/N001.mp4');
+                
+                // 添加更详细的事件监听
+                video.addEventListener('ended', () => {
+                    console.log('✅ N001播放完毕，开始转场特效');
+                    this.transitionFromN001ToN002();
+                });
+                
+                video.addEventListener('canplay', () => {
+                    console.log('✅ N001视频可以播放');
+                });
+                
+                video.addEventListener('playing', () => {
+                    console.log('▶️ N001视频开始播放');
+                });
+                
+                video.addEventListener('stalled', () => {
+                    console.warn('⚠️ N001视频播放停滞');
+                });
+                
+                video.addEventListener('waiting', () => {
+                    console.warn('⏳ N001视频等待数据');
+                });
+                
+                // 监听时间更新，显示播放进度
+                video.addEventListener('timeupdate', () => {
+                    if (video.duration > 0) {
+                        const progress = Math.round((video.currentTime / video.duration) * 100);
+                        if (progress % 20 === 0) { // 每20%显示一次
+                            console.log(`🎬 N001播放进度: ${progress}% (${video.currentTime.toFixed(1)}s/${video.duration.toFixed(1)}s)`);
+                        }
+                    }
+                });
+                
+                this.setCurrentVideo(video);
+                
+                // 移除超时机制，让N001自然播放或失败
+                console.log('🎬 N001已设置，等待自然播放或loaded事件');
+            }
+            
+            // 播放N002（循环）
+            playN002() {
+                // 防止重复播放 - 更严格的检查
+                if (this.currentVideo && this.currentVideo.src.includes('N002') && !this.currentVideo.paused) {
+                    console.log('🎬 N002已在播放中，跳过重复播放');
+                    return;
+                }
+                
+                // 检查是否已经有N002视频在播放
+                const existingN002 = this.videoContainer.querySelector('video[src*="N002"]');
+                if (existingN002 && !existingN002.paused) {
+                    console.log('🎬 检测到现有N002视频在播放，跳过重复创建');
+                    this.currentVideo = existingN002; // 确保currentVideo指向正确的视频
+                    // 确保激活按钮显示
+                    if (!this.isWaitingForClicks) {
+                        setTimeout(() => this.showActivateButton(), 1000);
+                    }
+                    return;
+                }
+                
+                this.updateCurrentVideo('N002');
+                this.updateStatus('播放N002（循环）');
+                
+                console.log('🎬 开始播放N002（循环）');
+                
+                const video = this.createVideo('镜头2/N002.mp4');
+                video.loop = true;
+                
+                // 开始播放时播放音效和雷声
+                video.addEventListener('playing', () => {
+                    console.log('🎬 N002开始播放，检查是否应该启动音效和雷声');
+                    if (this.isCurrentlyActiveScene()) {
+                        console.log('🎬 镜头2处于活跃状态，启动音效和雷声');
+                        this.playS02002();
+                        this.startThunder();
+                    } else {
+                        console.log('🎬 镜头2非活跃状态，不播放音效');
+                    }
+                    
+                    // 播放3秒后显示激活按钮，确保用户看到视频内容
+                    setTimeout(() => {
+                        if (!this.isWaitingForClicks) {
+                            console.log('🎬 N002播放中，显示激活按钮');
+                            this.showActivateButton();
+                        }
+                    }, 3000);
+                }, { once: true });
+                
+                // 备用：首次循环结束时也尝试显示按钮（防止上面的timeout失效）
+                video.addEventListener('ended', () => {
+                    if (!this.isWaitingForClicks) {
+                        console.log('🎬 N002循环结束，确保激活按钮显示');
+                        this.showActivateButton();
+                    }
+                });
+                
+                this.setCurrentVideo(video);
+            }
+            
+            // 播放N002（循环）- 加速版本，带震撼效果
+            playN002Fast() {
+                // 防止重复播放 - 更严格的检查
+                if (this.currentVideo && this.currentVideo.src.includes('N002') && !this.currentVideo.paused) {
+                    console.log('🎬 N002已在播放中，跳过重复播放');
+                    return;
+                }
+                
+                // 检查是否已经有N002视频在播放
+                const existingN002 = this.videoContainer.querySelector('video[src*="N002"]');
+                if (existingN002 && !existingN002.paused) {
+                    console.log('🎬 检测到现有N002视频在播放，跳过重复创建');
+                    this.currentVideo = existingN002;
+                    // 确保激活按钮显示
+                    if (!this.isWaitingForClicks) {
+                        setTimeout(() => this.showActivateButton(), 300); // 加速显示
+                    }
+                    return;
+                }
+                
+                this.updateCurrentVideo('N002');
+                this.updateStatus('播放N002（循环）- 加速版本');
+                
+                console.log('🎬 开始播放N002（循环）- 加速版本 + 震撼效果');
+                
+                const video = this.createVideo('镜头2/N002.mp4');
+                video.loop = true;
+                
+                // 添加快速从黑到亮的震撼效果
+                this.createBlackToLightShockEffect(video);
+                
+                // 开始播放时播放音效和雷声
+                video.addEventListener('playing', () => {
+                    console.log('🎬 N002快速版开始播放，检查是否应该启动音效和雷声');
+                    if (this.isCurrentlyActiveScene()) {
+                        console.log('🎬 镜头2处于活跃状态，启动音效和雷声');
+                        this.playS02002();
+                        this.startThunder();
+                    } else {
+                        console.log('🎬 镜头2非活跃状态，不播放音效');
+                    }
+                    
+                    // 播放1秒后显示激活按钮（加速版本）
+                    setTimeout(() => {
+                        if (!this.isWaitingForClicks) {
+                            console.log('🎬 N002快速版播放中，显示激活按钮');
+                            this.showActivateButton();
+                        }
+                    }, 1000);
+                }, { once: true });
+                
+                // 备用：首次循环结束时也尝试显示按钮
+                video.addEventListener('ended', () => {
+                    if (!this.isWaitingForClicks) {
+                        console.log('🎬 N002循环结束，确保激活按钮显示');
+                        this.showActivateButton();
+                    }
+                });
+                
+                this.setCurrentVideo(video);
+            }
+            
+            // 创建从黑到亮的震撼效果
+            createBlackToLightShockEffect(video) {
+                console.log('✨ 创建从黑到亮的震撼效果');
+                
+                // 创建震撼效果容器
+                const shockContainer = document.createElement('div');
+                shockContainer.className = 'black-to-light-shock';
+                shockContainer.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 20;
+                    pointer-events: none;
+                `;
+                
+                // 添加黑屏遮罩
+                const blackOverlay = document.createElement('div');
+                blackOverlay.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 1);
+                    z-index: 21;
+                    transition: opacity 0.3s ease-out;
+                `;
+                
+                // 添加亮度提升层
+                const brightLayer = document.createElement('div');
+                brightLayer.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(255, 255, 255, 0);
+                    z-index: 22;
+                    transition: all 0.2s ease-out;
+                    mix-blend-mode: screen;
+                `;
+                
+                shockContainer.appendChild(blackOverlay);
+                shockContainer.appendChild(brightLayer);
+                this.videoContainer.appendChild(shockContainer);
+                
+                // 添加震撼动画样式
+                const shockStyle = document.createElement('style');
+                shockStyle.textContent = `
+                    @keyframes shockScaleEffect {
+                        0% { 
+                            transform: scale(1);
+                        }
+                        20% { 
+                            transform: scale(1.05);
+                        }
+                        40% { 
+                            transform: scale(0.95);
+                        }
+                        60% { 
+                            transform: scale(1.03);
+                        }
+                        80% { 
+                            transform: scale(0.98);
+                        }
+                        100% { 
+                            transform: scale(1);
+                        }
+                    }
+                    
+                    .video-shock-scale {
+                        animation: shockScaleEffect 0.6s ease-in-out;
+                    }
+                `;
+                document.head.appendChild(shockStyle);
+                
+                // 执行震撼效果序列
+                setTimeout(() => {
+                    // 第一阶段：快速去除黑屏
+                    blackOverlay.style.opacity = '0';
+                    console.log('✨ 第一阶段：快速去除黑屏');
+                }, 100);
+                
+                setTimeout(() => {
+                    // 第二阶段：亮度爆发
+                    brightLayer.style.background = 'rgba(255, 255, 255, 0.3)';
+                    console.log('✨ 第二阶段：亮度爆发');
+                }, 200);
+                
+                setTimeout(() => {
+                    // 第三阶段：震撼缩放
+                    video.classList.add('video-shock-scale');
+                    console.log('✨ 第三阶段：震撼缩放');
+                }, 250);
+                
+                setTimeout(() => {
+                    // 第四阶段：逐渐恢复正常
+                    brightLayer.style.background = 'rgba(255, 255, 255, 0.1)';
+                    console.log('✨ 第四阶段：逐渐恢复正常');
+                }, 400);
+                
+                setTimeout(() => {
+                    // 第五阶段：完全恢复
+                    brightLayer.style.background = 'rgba(255, 255, 255, 0)';
+                    console.log('✨ 第五阶段：完全恢复');
+                }, 600);
+                
+                // 清理效果
+                setTimeout(() => {
+                    if (shockContainer.parentNode) {
+                        shockContainer.remove();
+                    }
+                    if (shockStyle.parentNode) {
+                        shockStyle.remove();
+                    }
+                    video.classList.remove('video-shock-scale');
+                    console.log('✨ 从黑到亮震撼效果完成');
+                }, 900);
+            }
+
+            // 创建从暗渐亮转场效果（接管N001的渐暗背景）
+            createDarkToLightTransition(video) {
+                console.log('✨ 创建从暗渐亮转场效果（无红光，直接从暗背景渐亮）');
+                
+                // 寻找并移除之前的渐暗遮罩
+                const existingOverlay = this.videoContainer.querySelector('.fade-to-n002-overlay');
+                
+                // 添加增强的震撼动画样式 (版本: 惊吓式v2.0)
+                const transitionStyle = document.createElement('style');
+                transitionStyle.textContent = `
+                    @keyframes enhancedShockEffect {
+                        /* 蓄力阶段：营造压迫感，增加颤抖 */
+                        0% { 
+                            transform: scale(0.3) rotate(0deg) translateX(0px);
+                            filter: brightness(0.05) contrast(0.2) blur(8px) saturate(0.1);
+                        }
+                        4% { 
+                            transform: scale(0.32) rotate(-0.5deg) translateX(-2px);
+                            filter: brightness(0.07) contrast(0.25) blur(7px) saturate(0.15);
+                        }
+                        8% { 
+                            transform: scale(0.35) rotate(0.5deg) translateX(2px);
+                            filter: brightness(0.1) contrast(0.3) blur(6px) saturate(0.2);
+                        }
+                        12% { 
+                            transform: scale(0.38) rotate(-1deg) translateX(-3px);
+                            filter: brightness(0.15) contrast(0.4) blur(5px) saturate(0.3);
+                        }
+                        16% { 
+                            transform: scale(0.4) rotate(1deg) translateX(3px);
+                            filter: brightness(0.2) contrast(0.5) blur(4px) saturate(0.4);
+                        }
+                        /* 爆发阶段：极端放大 + 快速颤抖 */
+                        20% { 
+                            transform: scale(18) rotate(-12deg) translateX(-8px);
+                            filter: brightness(10.0) contrast(6.0) blur(0px) saturate(5.0);
+                        }
+                        22% { 
+                            transform: scale(16) rotate(10deg) translateX(8px);
+                            filter: brightness(8.0) contrast(5.0) blur(0px) saturate(4.5);
+                        }
+                        24% { 
+                            transform: scale(14) rotate(-8deg) translateX(-6px);
+                            filter: brightness(7.0) contrast(4.5) blur(0px) saturate(4.0);
+                        }
+                        /* 强冲击阶段，加入震荡 */
+                        30% { 
+                            transform: scale(6) rotate(12deg) translateX(5px);
+                            filter: brightness(5.0) contrast(4.0) blur(0px) saturate(3.5);
+                        }
+                        35% { 
+                            transform: scale(5.5) rotate(-10deg) translateX(-4px);
+                            filter: brightness(4.5) contrast(3.8) blur(0px) saturate(3.2);
+                        }
+                        40% { 
+                            transform: scale(5) rotate(8deg) translateX(3px);
+                            filter: brightness(4.0) contrast(3.5) blur(0px) saturate(3.0);
+                        }
+                        50% { 
+                            transform: scale(3.5) rotate(-5deg) translateX(-2px);
+                            filter: brightness(3.0) contrast(3.0) blur(0px) saturate(2.5);
+                        }
+                        60% { 
+                            transform: scale(2.5) rotate(3deg) translateX(2px);
+                            filter: brightness(2.5) contrast(2.5) blur(0px) saturate(2.0);
+                        }
+                        /* 稳定过渡，持续轻微震荡 */
+                        70% { 
+                            transform: scale(1.8) rotate(-2deg) translateX(-1px);
+                            filter: brightness(2.0) contrast(2.2) blur(0px) saturate(1.8);
+                        }
+                        80% { 
+                            transform: scale(1.3) rotate(1deg) translateX(1px);
+                            filter: brightness(1.5) contrast(1.8) blur(0px) saturate(1.3);
+                        }
+                        90% { 
+                            transform: scale(1.1) rotate(-0.5deg) translateX(0px);
+                            filter: brightness(1.2) contrast(1.3) blur(0px) saturate(1.1);
+                        }
+                        /* 恢复正常 */
+                        100% { 
+                            transform: scale(1) rotate(0deg) translateX(0px);
+                            filter: brightness(1) contrast(1) blur(0px) saturate(1);
+                        }
+                    }
+                    
+                    @keyframes bodyShake {
+                        /* 配合蓄力阶段 - 轻微不安感 */
+                        0% { transform: translateX(0) translateY(0); }
+                        4% { transform: translateX(-1px) translateY(-1px); }
+                        8% { transform: translateX(1px) translateY(1px); }
+                        12% { transform: translateX(-2px) translateY(1px); }
+                        16% { transform: translateX(2px) translateY(-1px); }
+                        /* 爆发阶段 - 强烈但可控的震动 */
+                        20% { transform: translateX(-8px) translateY(-6px); }
+                        22% { transform: translateX(8px) translateY(6px); }
+                        24% { transform: translateX(-7px) translateY(5px); }
+                        26% { transform: translateX(7px) translateY(-5px); }
+                        28% { transform: translateX(-6px) translateY(-4px); }
+                        30% { transform: translateX(6px) translateY(4px); }
+                        32% { transform: translateX(-5px) translateY(3px); }
+                        34% { transform: translateX(5px) translateY(-3px); }
+                        36% { transform: translateX(-4px) translateY(-2px); }
+                        38% { transform: translateX(4px) translateY(2px); }
+                        /* 强震阶段 - 密集震动 */
+                        40% { transform: translateX(-6px) translateY(-4px); }
+                        42% { transform: translateX(6px) translateY(4px); }
+                        44% { transform: translateX(-5px) translateY(3px); }
+                        46% { transform: translateX(5px) translateY(-3px); }
+                        48% { transform: translateX(-4px) translateY(-2px); }
+                        50% { transform: translateX(4px) translateY(2px); }
+                        52% { transform: translateX(-3px) translateY(1px); }
+                        54% { transform: translateX(3px) translateY(-1px); }
+                        56% { transform: translateX(-2px) translateY(-1px); }
+                        58% { transform: translateX(2px) translateY(1px); }
+                        60% { transform: translateX(-1px) translateY(0px); }
+                        /* 逐渐平息 - 精细控制 */
+                        65% { transform: translateX(1px) translateY(-1px); }
+                        70% { transform: translateX(-1px) translateY(1px); }
+                        75% { transform: translateX(1px) translateY(0px); }
+                        80% { transform: translateX(-1px) translateY(0px); }
+                        85% { transform: translateX(0px) translateY(-1px); }
+                        90% { transform: translateX(0px) translateY(1px); }
+                        95% { transform: translateX(0px) translateY(0px); }
+                        100% { transform: translateX(0) translateY(0); }
+                    }
+                    
+                    .video-enhanced-shock {
+                        animation: enhancedShockEffect 0.6s ease-out;
+                    }
+                    
+                    .body-shock-effect {
+                        animation: bodyShake 0.6s ease-out;
+                    }
+                `;
+                document.head.appendChild(transitionStyle);
+                
+                // 等待视频准备好再开始从暗渐亮
+                setTimeout(() => {
+                    // 第一阶段：开始增强震撼效果（视频+全屏震动）
+                    video.classList.add('video-enhanced-shock');
+                    document.body.classList.add('body-shock-effect');
+                    console.log('✨ 第一阶段：开始增强震撼效果（视频缩放+旋转+亮度+全屏震动）');
+                    
+                    // 创建多层次闪光冲击效果
+                    this.createEnhancedFlashSequence();
+                    
+                    // 第二阶段：渐亮效果
+                    if (existingOverlay) {
+                        existingOverlay.style.transition = 'background 0.6s ease-out';
+                        existingOverlay.style.background = 'rgba(0, 0, 0, 0)';
+                        console.log('✨ 第二阶段：从暗背景开始渐亮');
+                        
+                        // 移除暗背景遮罩
+                        setTimeout(() => {
+                            if (existingOverlay.parentNode) {
+                                existingOverlay.remove();
+                            }
+                            console.log('✨ 第三阶段：移除暗背景，画面完全显示');
+                        }, 600);
+                    }
+                }, 100);
+                
+                // 清理样式
+                setTimeout(() => {
+                    video.classList.remove('video-enhanced-shock');
+                    document.body.classList.remove('body-shock-effect');
+                    
+                    if (transitionStyle.parentNode) {
+                        transitionStyle.remove();
+                    }
+                    console.log('✨ 优化版震撼转场效果完成（0.6秒）- 蓄力→爆发→冲击→恢复');
+                    console.log('🎯 版本信息: Enhanced Shock v5.0 - 优化震动版本');
+                }, 1200);
+            }
+            
+            // 创建增强的多层次闪光序列
+            createEnhancedFlashSequence() {
+                console.log('✨ 创建多层次闪光冲击序列');
+                
+                // 第一层：蓄力阶段的微弱红光
+                const preparationFlash = document.createElement('div');
+                preparationFlash.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: radial-gradient(circle, rgba(255,50,50,0.3) 0%, rgba(255,50,50,0.1) 50%, transparent 80%);
+                    z-index: 9996;
+                    opacity: 0;
+                    pointer-events: none;
+                    transition: opacity 0.2s ease-in-out;
+                `;
+                document.body.appendChild(preparationFlash);
+                
+                // 蓄力阶段红光渐显
+                setTimeout(() => preparationFlash.style.opacity = '1', 0);
+                setTimeout(() => preparationFlash.style.opacity = '0', 100);
+                
+                // 第二层：爆发阶段的强烈白光
+                const explosionFlash = document.createElement('div');
+                explosionFlash.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 15%, rgba(255,255,255,0.3) 35%, transparent 60%);
+                    z-index: 9997;
+                    opacity: 0;
+                    pointer-events: none;
+                    transition: opacity 0.05s ease-out;
+                `;
+                document.body.appendChild(explosionFlash);
+                
+                // 爆发阶段白光冲击（与20%关键帧同步）
+                setTimeout(() => {
+                    explosionFlash.style.opacity = '1';
+                    setTimeout(() => explosionFlash.style.opacity = '0', 80);
+                }, 120); // 20% of 600ms = 120ms
+                
+                // 第三层：冲击波效果
+                const shockwaveFlash = document.createElement('div');
+                shockwaveFlash.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: radial-gradient(circle, transparent 0%, rgba(255,255,255,0.6) 30%, rgba(255,255,255,0.2) 50%, transparent 70%);
+                    z-index: 9998;
+                    opacity: 0;
+                    pointer-events: none;
+                    transition: opacity 0.1s ease-out;
+                `;
+                document.body.appendChild(shockwaveFlash);
+                
+                // 冲击波效果（与40%关键帧同步）
+                setTimeout(() => {
+                    shockwaveFlash.style.opacity = '1';
+                    setTimeout(() => shockwaveFlash.style.opacity = '0', 120);
+                }, 240); // 40% of 600ms = 240ms
+                
+                // 清理所有闪光效果
+                setTimeout(() => {
+                    [preparationFlash, explosionFlash, shockwaveFlash].forEach(flash => {
+                        if (flash.parentNode) {
+                            flash.remove();
+                        }
+                    });
+                    console.log('✨ 多层次闪光序列完成');
+                }, 600);
+            }
+            
+            // 播放N003
+            playN003() {
+                this.updateCurrentVideo('N003');
+                this.updateStatus('播放N003');
+                
+                console.log('🎬 开始播放N003：优化视觉效果');
+                
+                const video = this.createVideo('镜头2/N003.mp4');
+                
+                // N003开始播放时添加轻微的亮度提升效果（去掉过度白光）
+                video.addEventListener('playing', () => {
+                    console.log('✨ N003开始播放，添加轻微亮度提升效果');
+                    this.createSubtleBrightnessEffect();
+                }, { once: true });
+                
+                video.addEventListener('ended', () => {
+                    console.log('✅ N003播放完毕，镜头2完成');
+                    this.sceneComplete();
+                });
+                
+                this.setCurrentVideo(video);
+            }
+            
+            // 播放白光爆发音效
+            playWhiteFlashSound() {
+                if (!this.audioUnlocked) {
+                    console.log('🎵 音频未解锁，跳过白光音效');
+                    return;
+                }
+                
+                console.log('✨ 播放白光爆发音效');
+                
+                // 创建白光音效（使用knife音效的高音调版本）
+                const flashAudio = new Audio('sounds/knife.mp3');
+                flashAudio.volume = 0.6;
+                flashAudio.playbackRate = 1.5; // 提高音调
+                
+                flashAudio.play().catch(e => {
+                    console.warn('白光音效播放失败:', e);
+                });
+                
+                // 添加视觉白光效果
+                this.createWhiteFlashEffect();
+            }
+            
+            // 创建白光视觉效果（保留原版本，供其他地方使用）
+            createWhiteFlashEffect() {
+                console.log('✨ 创建白光视觉效果');
+                
+                const flash = document.createElement('div');
+                flash.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 40%, rgba(255,255,255,0) 100%);
+                    z-index: 9999;
+                    opacity: 0;
+                    pointer-events: none;
+                    transition: opacity 0.1s ease-out;
+                `;
+                
+                document.body.appendChild(flash);
+                
+                // 瞬间闪现
+                setTimeout(() => {
+                    flash.style.opacity = '1';
+                }, 10);
+                
+                // 快速淡出
+                setTimeout(() => {
+                    flash.style.opacity = '0';
+                    setTimeout(() => {
+                        if (flash.parentNode) {
+                            flash.remove();
+                        }
+                        console.log('✨ 白光效果完成');
+                    }, 200);
+                }, 150);
+            }
+
+            // 创建轻微亮度提升效果（替代过度白光）
+            createSubtleBrightnessEffect() {
+                console.log('✨ 创建轻微亮度提升效果（不遮挡N003画面）');
+                
+                const brightness = document.createElement('div');
+                brightness.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: rgba(255, 255, 255, 0);
+                    z-index: 999;
+                    opacity: 0;
+                    pointer-events: none;
+                    transition: all 0.3s ease-out;
+                    mix-blend-mode: screen;
+                `;
+                
+                document.body.appendChild(brightness);
+                
+                // 轻微提升亮度
+                setTimeout(() => {
+                    brightness.style.background = 'rgba(255, 255, 255, 0.1)';
+                    brightness.style.opacity = '1';
+                }, 50);
+                
+                // 快速恢复正常
+                setTimeout(() => {
+                    brightness.style.background = 'rgba(255, 255, 255, 0)';
+                    brightness.style.opacity = '0';
+                }, 200);
+                
+                // 清理元素
+                setTimeout(() => {
+                    if (brightness.parentNode) {
+                        brightness.remove();
+                    }
+                    console.log('✨ 轻微亮度提升效果完成');
+                }, 500);
+            }
+            
+            // 创建视频元素
+            createVideo(src) {
+                const video = document.createElement('video');
+                video.className = 'scene2-video';
+                // 不要静音视频，让视频自带音效播放
+                video.muted = false;
+                video.volume = 1.0;
+                video.autoplay = true;
+                video.playsInline = true;
+                video.preload = 'auto';
+                
+                // 添加播放状态跟踪
+                video._hasStartedPlaying = false;
+                video._loadAttempted = false;
+                video._errorCount = 0;
+                
+                video.addEventListener('error', (e) => {
+                    video._errorCount++;
+                    console.error(`❌ 视频错误事件 #${video._errorCount}: ${src}`, e);
+                    console.error(`❌ 错误详情:`, e.target.error);
+                    console.error(`❌ 当前视频src:`, video.src);
+                    console.error(`❌ 视频readyState:`, video.readyState);
+                    console.error(`❌ 视频networkState:`, video.networkState);
+                    
+                    // 如果视频已经开始播放，忽略错误事件（可能是播放结束后的编码错误）
+                    if (video._hasStartedPlaying) {
+                        console.log('⚠️ 视频已经开始播放，忽略错误事件');
+                        return;
+                    }
+                    
+                    // 检查是否是空src错误
+                    if (e.target.error && e.target.error.code === 4) {
+                        console.warn('❌ 检测到空src错误，可能是src被意外清空');
+                        if (!video.src && src) {
+                            console.log('🔧 尝试重新设置src:', src);
+                            video.src = src;
+                            return;
+                        }
+                    }
+                    
+                    // 防止多次错误处理
+                    if (video._errorCount > 1) {
+                        console.log(`⚠️ 视频错误次数过多 (${video._errorCount})，跳过处理`);
+                        return;
+                    }
+                    
+                    // 给视频一些时间加载，再决定是否fallback
+                    setTimeout(() => {
+                        if (!video._hasStartedPlaying && video.readyState === 0) {
+                            console.warn('🚨 视频确实无法播放，执行fallback');
+                            
+                            if (src.includes('N001')) {
+                                console.log('🔄 N001确实加载失败，自动跳转到N002');
+                                this.playN002();
+                            } else if (src.includes('N002')) {
+                                console.log('❌ N002确实加载失败，显示错误信息');
+                                this.showVideoError('N002视频加载失败');
+                            } else if (src.includes('N003')) {
+                                console.log('🔄 N003确实加载失败，直接完成镜头2');
+                                this.sceneComplete();
+                            }
+                        }
+                    }, 2000);
+                });
+                
+                video.addEventListener('loadeddata', () => {
+                    console.log(`✅ 视频数据加载完成: ${src}`);
+                    console.log(`⏰ 视频时长: ${video.duration} 秒`);
+                    // 手动尝试播放以确保播放成功
+                    video.play().then(() => {
+                        console.log(`▶️ 视频播放成功: ${src}`);
+                    }).catch(e => {
+                        console.warn(`⚠️ 视频自动播放失败: ${src}`, e);
+                        // 如果自动播放失败，等待用户交互
+                        this.waitForUserInteraction(video);
+                    });
+                });
+                
+                // 监听playing事件，标记视频已开始播放
+                video.addEventListener('playing', () => {
+                    if (!video._hasStartedPlaying) {
+                        video._hasStartedPlaying = true;
+                        console.log(`🎬 ${src} 开始播放，标记播放状态`);
+                        
+                        // N001播放标记（不再显示调试指示器）
+                        if (src.includes('N001')) {
+                            console.log('🎬 N001开始播放，用户应该能看到视频内容');
+                        }
+                    }
+                });
+                
+                // 设置src在所有事件监听器之后，避免过早触发错误事件
+                console.log(`🎬 设置视频src: ${src}`);
+                video.src = src;
+                video._loadAttempted = true;
+                
+                return video;
+            }
+            
+            // 等待用户交互后播放视频
+            waitForUserInteraction(video) {
+                console.log('🖱️ 等待用户交互来播放视频');
+                const playOnClick = () => {
+                    video.play().then(() => {
+                        console.log('✅ 用户交互后视频播放成功');
+                        document.removeEventListener('click', playOnClick);
+                    }).catch(e => {
+                        console.error('❌ 用户交互后视频播放仍然失败:', e);
+                    });
+                };
+                document.addEventListener('click', playOnClick);
+            }
+            
+            // 设置当前视频
+            setCurrentVideo(video) {
+                // 清理之前的视频
+                if (this.currentVideo && this.currentVideo !== video) {
+                    console.log('🧹 清理之前的视频');
+                    this.currentVideo.pause();
+                    // 使用removeAttribute而不是设置空字符串，避免src变成页面URL
+                    this.currentVideo.removeAttribute('src');
+                    this.currentVideo.load(); // 重置视频状态
+                    if (this.currentVideo.parentNode) {
+                        this.currentVideo.remove();
+                    }
+                }
+                
+                // 清理视频容器中的所有现有视频（除了当前要设置的视频）
+                const existingVideos = this.videoContainer.querySelectorAll('video');
+                existingVideos.forEach(v => {
+                    if (v !== video) {
+                        console.log('🧹 清理容器中的现有视频');
+                        v.pause();
+                        // 使用removeAttribute而不是设置空字符串
+                        v.removeAttribute('src');
+                        v.load(); // 重置视频状态
+                        v.remove();
+                    }
+                });
+                
+                // 设置新视频
+                if (!video.parentNode) {
+                    this.videoContainer.appendChild(video);
+                }
+                this.currentVideo = video;
+                
+                console.log(`✅ 当前视频已设置: ${video.src}`);
+            }
+            
+            // 播放S02002音效
+            playS02002() {
+                if (this.s02002Audio) return; // 防止重复播放
+                
+                // 检查是否在iframe中且当前镜头不是镜头2
+                const isInIframe = window.parent !== window;
+                if (isInIframe && !this.isCurrentlyActiveScene()) {
+                    console.log('🎵 镜头2当前非活跃状态，跳过S02002音效播放');
+                    return;
+                }
+                
+                if (!this.audioUnlocked) {
+                    console.log('🎵 音频未解锁，将S02002音效加入待处理队列');
+                    this.pendingAudioActions.push(() => this.playS02002());
+                    return;
+                }
+                
+                console.log('🔊 播放S02002音效');
+                this.s02002Audio = new Audio('镜头2/S02002.MP3');
+                this.s02002Audio.volume = 0.8;
+                this.s02002Audio.play().catch(e => {
+                    console.warn('S02002音效播放失败:', e);
+                });
+            }
+            
+            // 开始雷声循环
+            startThunder() {
+                if (this.thunderAudio) return; // 防止重复播放
+                
+                // 检查是否在iframe中且当前镜头不是镜头2
+                const isInIframe = window.parent !== window;
+                if (isInIframe && !this.isCurrentlyActiveScene()) {
+                    console.log('🎵 镜头2当前非活跃状态，跳过雷声播放');
+                    return;
+                }
+                
+                if (!this.audioUnlocked) {
+                    console.log('🎵 音频未解锁，将雷声加入待处理队列');
+                    this.pendingAudioActions.push(() => this.startThunder());
+                    return;
+                }
+                
+                console.log('⛈️ 开始雷声循环');
+                this.thunderAudio = new Audio('sounds/Rain.MP3');
+                this.thunderAudio.volume = 0.3;
+                this.thunderAudio.loop = true;
+                this.thunderAudio.preload = 'auto';
+                
+                // 先尝试加载，再播放
+                this.thunderAudio.addEventListener('canplaythrough', () => {
+                    console.log('⛈️ 雷声音频已加载，开始播放');
+                    this.thunderAudio.play().catch(e => {
+                        console.warn('雷声播放失败:', e);
+                    });
+                }, { once: true });
+                
+                this.thunderAudio.addEventListener('error', (e) => {
+                    console.error('⛈️ 雷声音频加载失败:', e);
+                });
+                
+                // 立即加载
+                this.thunderAudio.load();
+            }
+            
+            // 停止雷声
+            stopThunder() {
+                if (this.thunderAudio) {
+                    this.thunderAudio.pause();
+                    this.thunderAudio.removeAttribute('src');
+                    this.thunderAudio.load();
+                    this.thunderAudio = null;
+                    console.log('⛈️ 雷声已停止');
+                }
+            }
+            
+            // 显示激活按钮
+            showActivateButton() {
+                this.isWaitingForClicks = true;
+                this.clickCount = 0;
+                this.updateClickCount();
+                this.updateStatus('等待点击激活');
+                
+                const button = document.createElement('div');
+                button.className = 'activate-button';
+                button.id = 'activate-btn';
+                
+                button.innerHTML = `
+                    <div class="button-text">
+                        连续点击<br>激活玉佩<br>
+                        <span id="click-counter" style="font-size: 12px; opacity: 0.8;">
+                            (${this.clickCount}/${this.requiredClicks})
+                        </span>
+                    </div>
+                `;
+                
+                button.addEventListener('click', () => {
+                    this.handleActivateClick();
+                });
+                
+                this.uiContainer.appendChild(button);
+                
+                setTimeout(() => {
+                    button.style.opacity = '1';
+                }, 100);
+                
+                // 添加备用交互：点击视频区域也能激活
+                this.addVideoClickHandler();
+                console.log('🎯 激活按钮已显示，也可直接点击视频区域激活');
+            }
+            
+            // 添加视频点击处理器（备用交互）
+            addVideoClickHandler() {
+                if (this.currentVideo && !this.currentVideo.dataset.clickHandlerAdded) {
+                    this.currentVideo.addEventListener('click', () => {
+                        if (this.isWaitingForClicks) {
+                            console.log('🖱️ 用户点击视频区域激活');
+                            this.handleActivateClick();
+                        }
+                    });
+                    this.currentVideo.dataset.clickHandlerAdded = 'true';
+                }
+                
+                // 也给视频容器添加点击处理
+                if (!this.videoContainer.dataset.clickHandlerAdded) {
+                    this.videoContainer.addEventListener('click', () => {
+                        if (this.isWaitingForClicks) {
+                            console.log('🖱️ 用户点击视频容器激活');
+                            this.handleActivateClick();
+                        }
+                    });
+                    this.videoContainer.dataset.clickHandlerAdded = 'true';
+                }
+            }
+            
+            // 处理激活点击
+            handleActivateClick() {
+                this.clickCount++;
+                console.log(`🖱️ 玉佩激活点击 ${this.clickCount}/${this.requiredClicks}`);
+                
+                this.updateClickCount();
+                this.createClickEffect();
+                this.createScreenShake(); // 添加屏幕振动效果
+                
+                if (this.clickCount >= this.requiredClicks) {
+                    console.log('✅ 达到所需点击次数，激活玉佩！');
+                    this.activateJade();
+                } else {
+                    this.flashButton();
+                }
+            }
+            
+            // 创建屏幕振动效果 - 惊吓版
+            createScreenShake() {
+                console.log('🌀 创建惊吓式屏幕振动效果');
+                
+                // 对视频容器进行振动，避免影响UI按钮位置
+                const videoContainer = this.videoContainer;
+                
+                // 惊吓式振动动画：先蓄力后爆发
+                const shakeAnimation = [
+                    // 蓄力阶段 - 轻微颤抖
+                    { transform: 'translate(0, 0)' },
+                    { transform: 'translate(-1px, -1px)' },
+                    { transform: 'translate(1px, 1px)' },
+                    { transform: 'translate(-1px, 1px)' },
+                    // 爆发阶段 - 剧烈震动
+                    { transform: 'translate(-20px, -16px)' },
+                    { transform: 'translate(20px, 16px)' },
+                    { transform: 'translate(-18px, 14px)' },
+                    { transform: 'translate(18px, -14px)' },
+                    { transform: 'translate(-16px, -12px)' },
+                    { transform: 'translate(16px, 12px)' },
+                    { transform: 'translate(-14px, 10px)' },
+                    { transform: 'translate(14px, -10px)' },
+                    // 强震余波
+                    { transform: 'translate(-10px, -8px)' },
+                    { transform: 'translate(10px, 8px)' },
+                    { transform: 'translate(-8px, 6px)' },
+                    { transform: 'translate(8px, -6px)' },
+                    { transform: 'translate(-6px, -4px)' },
+                    { transform: 'translate(6px, 4px)' },
+                    { transform: 'translate(-3px, 2px)' },
+                    { transform: 'translate(3px, -2px)' },
+                    { transform: 'translate(0, 0)' }
+                ];
+                
+                // 执行惊吓式振动动画
+                videoContainer.animate(shakeAnimation, {
+                    duration: 800, // 增加到800ms让效果更明显
+                    easing: 'ease-out'
+                });
+                
+                // 惊吓式设备振动模式
+                if (navigator.vibrate) {
+                    navigator.vibrate([50, 30, 200, 50, 200, 50, 100]); // 蓄力→爆发→余震
+                }
+            }
+            
+            // 创建点击特效
+            createClickEffect() {
+                const button = document.getElementById('activate-btn');
+                if (!button) return;
+                
+                const ripple = document.createElement('div');
+                ripple.style.cssText = `
+                    position: absolute;
+                    width: 20px;
+                    height: 20px;
+                    background: rgba(255, 255, 255, 0.6);
+                    border-radius: 50%;
+                    transform: translate(-50%, -50%);
+                    animation: clickRipple 0.6s ease-out forwards;
+                    pointer-events: none;
+                    top: 50%;
+                    left: 50%;
+                `;
+                
+                button.appendChild(ripple);
+                
+                setTimeout(() => {
+                    if (ripple.parentNode) {
+                        ripple.remove();
+                    }
+                }, 600);
+                
+                // 按钮缩放效果
+                button.style.transform = 'translate(-50%, -50%) scale(0.95)';
+                setTimeout(() => {
+                    button.style.transform = 'translate(-50%, -50%) scale(1)';
+                }, 150);
+            }
+            
+            // 按钮闪烁
+            flashButton() {
+                const button = document.getElementById('activate-btn');
+                if (!button) return;
+                
+                button.style.borderColor = 'rgba(255, 255, 100, 0.9)';
+                button.style.boxShadow = '0 0 20px rgba(255, 255, 100, 0.5)';
+                
+                setTimeout(() => {
+                    button.style.borderColor = 'rgba(255, 255, 255, 0.6)';
+                    button.style.boxShadow = 'none';
+                }, 300);
+            }
+            
+            // 激活玉佩
+            activateJade() {
+                const button = document.getElementById('activate-btn');
+                if (button) {
+                    button.style.opacity = '0';
+                    setTimeout(() => button.remove(), 300);
+                }
+                
+                this.isWaitingForClicks = false;
+                this.updateStatus('玉佩已激活');
+                
+                // 开始N002到N003的转场特效
+                setTimeout(() => {
+                    this.transitionFromN002ToN003();
+                }, 500);
+            }
+            
+            // 场景完成
+            sceneComplete() {
+                this.stopThunder();
+                this.updateStatus('场景完成');
+                
+                // 直接跳转到镜头3，不显示继续按钮
+                console.log('🎬 镜头2完成，直接跳转到镜头3');
+                this.continueToScene3();
+            }
+            
+            // 显示继续按钮
+            showContinueButton() {
+                const continueButton = document.createElement('div');
+                continueButton.className = 'continue-button';
+                continueButton.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(0, 0, 0, 0.8);
+                    color: white;
+                    padding: 40px;
+                    border-radius: 20px;
+                    border: 2px solid #ffcc00;
+                    text-align: center;
+                    font-size: 18px;
+                    z-index: 999999;
+                    cursor: pointer;
+                    opacity: 0;
+                    transition: all 0.5s ease;
+                `;
+                
+                continueButton.innerHTML = `
+                    <h2 style="margin-bottom: 20px; color: #ffcc00;">🎬 镜头2完成</h2>
+                    <p style="margin-bottom: 20px;">玉佩觉醒体验结束</p>
+                    <div style="
+                        padding: 15px 30px;
+                        background: linear-gradient(45deg, #ffcc00, #ff9900);
+                        color: #000;
+                        border-radius: 10px;
+                        font-weight: bold;
+                        font-size: 16px;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                    ">
+                        点击继续 → 镜头3：时空穿越
+                    </div>
+                `;
+                
+                // 添加悬停效果
+                const buttonDiv = continueButton.querySelector('div');
+                buttonDiv.addEventListener('mouseenter', () => {
+                    buttonDiv.style.background = 'linear-gradient(45deg, #ff9900, #ffcc00)';
+                    buttonDiv.style.transform = 'scale(1.05)';
+                });
+                
+                buttonDiv.addEventListener('mouseleave', () => {
+                    buttonDiv.style.background = 'linear-gradient(45deg, #ffcc00, #ff9900)';
+                    buttonDiv.style.transform = 'scale(1)';
+                });
+                
+                // 点击事件
+                continueButton.addEventListener('click', () => {
+                    this.continueToScene3();
+                });
+                
+                this.uiContainer.appendChild(continueButton);
+                
+                // 淡入显示
+                setTimeout(() => {
+                    continueButton.style.opacity = '1';
+                }, 100);
+            }
+            
+            // 继续到镜头3
+            continueToScene3() {
+                console.log('🎬 镜头2自动完成，直接跳转到镜头3');
+                
+                // 直接通知故事管理器镜头2完成，不显示中间界面
+                    this.notifyScene2Complete();
+            }
+            
+            // 显示镜头3转场提示
+            showToBeContined() {
+                const message = document.createElement('div');
+                message.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: linear-gradient(135deg, #000 0%, #333 100%);
+                    color: white;
+                    padding: 60px;
+                    border-radius: 30px;
+                    border: 3px solid #ffcc00;
+                    text-align: center;
+                    font-size: 24px;
+                    z-index: 999999;
+                    opacity: 0;
+                    transition: all 1s ease;
+                    box-shadow: 0 0 30px rgba(255, 204, 0, 0.5);
+                `;
+                
+                message.innerHTML = `
+                    <h1 style="margin-bottom: 30px; color: #ffcc00; font-size: 36px; text-shadow: 0 0 10px rgba(255, 204, 0, 0.8);">
+                        🎬 镜头2完成
+                    </h1>
+                    <p style="margin-bottom: 20px; font-size: 28px; color: #fff;">
+                        正在转场到镜头3...
+                    </p>
+                    <p style="font-size: 16px; color: #ccc; opacity: 0.8;">
+                        时空穿越即将开始
+                    </p>
+                `;
+                
+                this.uiContainer.appendChild(message);
+                
+                // 淡入显示
+                setTimeout(() => {
+                    message.style.opacity = '1';
+                }, 100);
+                
+                // 2秒后淡出（加快转场速度）
+                setTimeout(() => {
+                    message.style.opacity = '0';
+                    setTimeout(() => {
+                        if (message.parentNode) {
+                            message.remove();
+                        }
+                    }, 500);
+                }, 2000);
+            }
+            
+            // 通知镜头2完成
+            notifyScene2Complete() {
+                console.log('📡 镜头2完成，发送信号给故事管理器');
+                
+                // 如果在iframe中，发送消息给父窗口
+                if (window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'scene2-complete',
+                        timestamp: Date.now()
+                    }, '*');
+                    console.log('📡 已发送镜头2完成信号');
+                }
+            }
+            
+            // 重置
+            reset() {
+                if (this.currentVideo) {
+                    this.currentVideo.pause();
+                    this.currentVideo.removeAttribute('src');
+                    this.currentVideo.load();
+                    this.currentVideo = null;
+                }
+                
+                this.stopThunder();
+                
+                if (this.s02002Audio) {
+                    this.s02002Audio.pause();
+                    this.s02002Audio.src = '';
+                    this.s02002Audio = null;
+                }
+                
+                this.videoContainer.innerHTML = '';
+                this.uiContainer.innerHTML = '';
+                
+                this.clickCount = 0;
+                this.isWaitingForClicks = false;
+                
+                this.updateClickCount();
+                this.updateCurrentVideo('无');
+                this.updateStatus('已重置');
+                
+                console.log('🔄 场景已重置');
+            }
+            
+            // 更新UI显示
+            updateClickCount() {
+                document.getElementById('click-count').textContent = this.clickCount;
+                const counter = document.getElementById('click-counter');
+                if (counter) {
+                    counter.textContent = `(${this.clickCount}/${this.requiredClicks})`;
+                }
+            }
+            
+            updateCurrentVideo(video) {
+                document.getElementById('current-video').textContent = video;
+            }
+            
+            updateStatus(status) {
+                document.getElementById('status').textContent = status;
+            }
+        }
+        
+        // 全局实例
+        let scene2;
+        
+        // 初始化逻辑
+        function initializeScene2() {
+            scene2 = new SimpleScene2();
+            
+            // 检测是否在iframe中运行
+            const isInIframe = window.parent !== window;
+            
+            if (isInIframe) {
+                console.log('📱 检测到iframe环境，启用故事模式');
+                // 在iframe中运行，隐藏控制面板并自动启动
+                const controls = document.querySelector('.controls');
+                if (controls) {
+                    controls.style.display = 'none';
+                }
+                
+                // 延迟启动，确保iframe完全加载和音频解锁
+                setTimeout(() => {
+                    console.log('🎬 故事模式：设置镜头2，但不立即启动');
+                    
+                    // 设置监听器检查镜头激活状态
+                    scene2.setupActivationMonitor();
+                    
+                    console.log('🎬 等待镜头2真正激活时再启动播放');
+                    // 不再自动启动，等待镜头激活事件
+                    
+                    // 额外的安全机制：15秒后如果还没有激活按钮，强制显示
+                    setTimeout(() => {
+                        if (!scene2.isWaitingForClicks && scene2.currentVideo && 
+                            scene2.currentVideo.src.includes('N002')) {
+                            console.log('🚨 强制显示激活按钮（安全机制）');
+                            scene2.showActivateButton();
+                        }
+                    }, 15000);
+                }, 1000);
+            } else {
+                console.log('🧪 检测到独立环境，启用测试模式');
+                console.log('🧪 测试模式：等待手动启动');
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🎬 镜头2页面已加载');
+            initializeScene2();
+        });
+        
+        // 控制函数
+        function startScene2() {
+            if (scene2) {
+                scene2.start();
+            }
+        }
+        
+        function testN001() {
+            if (scene2) scene2.playN001();
+        }
+        
+        function testN002() {
+            if (scene2) scene2.playN002();
+        }
+        
+        function testN003() {
+            if (scene2) scene2.playN003();
+        }
+        
+        function playThunder() {
+            if (scene2) scene2.startThunder();
+        }
+        
+        function stopThunder() {
+            if (scene2) scene2.stopThunder();
+        }
+        
+        function testThunderOnly() {
+            console.log('🧪 独立测试雷声');
+            const testAudio = new Audio('sounds/Rain.MP3');
+            testAudio.volume = 0.3;
+            testAudio.loop = true;
+            
+            testAudio.addEventListener('canplaythrough', () => {
+                console.log('✅ 雷声音频加载成功，开始播放');
+                testAudio.play().then(() => {
+                    console.log('✅ 雷声播放成功');
+                    
+                    // 5秒后自动停止
+                    setTimeout(() => {
+                        testAudio.pause();
+                        testAudio.src = '';
+                        console.log('⏹️ 测试雷声已停止');
+                    }, 5000);
+                }).catch(e => {
+                    console.error('❌ 雷声播放失败:', e);
+                });
+            });
+            
+            testAudio.addEventListener('error', (e) => {
+                console.error('❌ 雷声音频加载失败:', e);
+                console.error('❌ 检查文件路径: sounds/Rain.MP3');
+            });
+            
+            testAudio.load();
+        }
+        
+        function showButton() {
+            if (scene2) scene2.showActivateButton();
+        }
+        
+        function resetAll() {
+            if (scene2) scene2.reset();
+        }
+        
+        function triggerCompletion() {
+            console.log('🚀 手动触发镜头2完成');
+            if (scene2) {
+                scene2.continueToScene3();
+            }
+        }
+        
+        // 监听来自父窗口的停止音频指令
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'stop-all-audio') {
+                console.log('🔇 镜头2收到停止音频指令');
+                if (scene2) {
+                    // 停止雷声音频
+                    scene2.stopThunder();
+                    
+                    // 停止S02002音效
+                    if (scene2.s02002Audio) {
+                        scene2.s02002Audio.pause();
+                        scene2.s02002Audio.src = '';
+                        scene2.s02002Audio = null;
+                    }
+                    
+                    console.log('🔇 镜头2所有音频已停止');
+                }
+            }
+        });
+        
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case '1': startScene2(); break;
+                case '2': testN001(); break;
+                case '3': testN002(); break;
+                case '4': testN003(); break;
+                case '5': playThunder(); break;
+                case '6': showButton(); break;
+                case '7': stopThunder(); break;
+                case '8': testThunderOnly(); break;
+                case '9': triggerCompletion(); break; // 添加快捷键触发完成
+                case 'r': case 'R': resetAll(); break;
+            }
+        });
+        
+        console.log('🧪 简化镜头2测试已就绪');
+        console.log('🎮 快捷键: 1=开始, 2-4=视频, 5=雷声, 6=按钮, 7=停止雷声, 8=测试雷声, R=重置');
+        console.log('🔄 修改版本: 自动跳转到镜头3，不显示中间界面 - 更新时间：' + new Date().toLocaleString());
+    </script>
+    <script src="scripts/keyboardToggle.js"></script>
+</body>
+</html> 

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镜头5按钮样式测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .comparison-container {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            flex: 1;
+            padding: 20px;
+            background: #2a2a2a;
+            border-radius: 10px;
+            position: relative;
+            height: 300px;
+        }
+        
+        .section-title {
+            color: #ffcc00;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        /* 镜头4/5风格按钮（应该一致） */
+        .action-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 70%, transparent 100%);
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            z-index: 999999;
+            opacity: 0.8;
+            animation: rippleButton 2s infinite;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            text-align: center;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        .action-button::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            animation: rippleWave 2s infinite;
+            z-index: -1;
+        }
+        
+        .action-button::after {
+            content: '';
+            position: absolute;
+            width: 120%;
+            height: 120%;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: rippleWave 2s infinite 0.5s;
+            z-index: -2;
+        }
+        
+        .action-button:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 70%, transparent 100%);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* 圆形按钮波动动画 */
+        @keyframes rippleButton {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1); 
+                opacity: 0.8; 
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.05); 
+                opacity: 1; 
+            }
+        }
+        
+        /* 波纹扩散动画 */
+        @keyframes rippleWave {
+            0% { 
+                transform: scale(1); 
+                opacity: 0.6; 
+            }
+            50% { 
+                transform: scale(1.3); 
+                opacity: 0.3; 
+            }
+            100% { 
+                transform: scale(1.6); 
+                opacity: 0; 
+            }
+        }
+        
+        /* 旧版金色按钮（对比用） */
+        .old-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        .old-button:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+            to { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.3); }
+        }
+        
+        .description {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #ccc;
+            text-align: center;
+        }
+        
+        .status {
+            background: #333;
+            padding: 15px;
+            border-radius: 5px;
+            color: #90EE90;
+        }
+        
+        .control-button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .control-button:hover {
+            background: linear-gradient(45deg, #45a049, #4CAF50);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 style="color: #ffcc00; text-align: center;">🎯 镜头5按钮样式测试</h1>
+        <p style="text-align: center; color: #ccc;">验证镜头5的按钮样式是否与镜头1风格保持一致</p>
+        
+        <div class="comparison-container">
+            <!-- 新版样式（镜头1风格） -->
+            <div class="test-section">
+                <h3 class="section-title">✅ 新版样式（镜头1风格）</h3>
+                <button class="action-button">发生了什么？</button>
+                <div class="description">
+                    圆形波动按钮<br>
+                    半透明白色渐变<br>
+                    双重波纹扩散效果
+                </div>
+            </div>
+            
+            <!-- 旧版样式（对比） -->
+            <div class="test-section">
+                <h3 class="section-title">❌ 旧版样式（对比）</h3>
+                <button class="old-button">发生了什么？</button>
+                <div class="description">
+                    椭圆形金色按钮<br>
+                    渐变发光效果<br>
+                    不符合镜头1风格
+                </div>
+            </div>
+        </div>
+        
+        <!-- 测试结果 -->
+        <div class="status">
+            <h3>✅ 修复完成</h3>
+            <p><strong>修改内容：</strong></p>
+            <ul>
+                <li>✅ 将镜头5的金色椭圆按钮改为圆形波动按钮</li>
+                <li>✅ 采用与镜头1/4一致的半透明白色渐变样式</li>
+                <li>✅ 添加双重波纹扩散动画效果</li>
+                <li>✅ 统一按钮尺寸为140x140px</li>
+                <li>✅ 保持backdrop-filter模糊背景效果</li>
+            </ul>
+            
+            <p><strong>技术特点：</strong></p>
+            <ul>
+                <li>🎨 与镜头1风格完全一致</li>
+                <li>🌊 流畅的波动和扩散动画</li>
+                <li>✨ 半透明玻璃质感</li>
+                <li>🎯 精确的居中定位</li>
+                <li>📱 响应式悬停效果</li>
+            </ul>
+        </div>
+        
+        <!-- 测试链接 -->
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="control-button" onclick="window.open('scene5-new.html', '_blank')">
+                🎬 测试镜头5（新样式）
+            </button>
+            <button class="control-button" onclick="window.open('index-story.html', '_blank')">
+                🎭 测试完整故事流程
+            </button>
+        </div>
+    </div>
+</body>
+</html> 

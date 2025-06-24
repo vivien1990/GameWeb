@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沉浸式动态互动绘本 - 完整故事</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            overflow: hidden;
+            font-family: 'Microsoft YaHei', sans-serif;
+            cursor: crosshair;
+        }
+        
+        /* 镜头容器 */
+        .scene-frame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            pointer-events: none;
+        }
+        
+        .scene-frame.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .scene-frame iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        /* 转场效果 */
+        .transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 99999;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            pointer-events: none;
+        }
+        
+        .transition-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* 镜头标题显示 */
+        .scene-title {
+            display: none !important; /* 隐藏"镜头X"文字提示 */
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            z-index: 10000;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 8px 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .scene-title.show {
+            opacity: 1;
+        }
+        
+        /* 控制面板 */
+        .story-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            z-index: 10000;
+            min-width: 200px;
+            border: 1px solid #333;
+        }
+        
+        .control-button {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #666;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: background 0.3s;
+        }
+        
+        .control-button:hover {
+            background: #555;
+        }
+        
+        .control-button:disabled {
+            background: #222;
+            color: #666;
+            cursor: not-allowed;
+        }
+        
+        .status-info {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #666;
+            font-size: 10px;
+            opacity: 0.8;
+        }
+        
+        /* 加载动画 */
+        .loading-indicator {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .loading-indicator.show {
+            opacity: 1;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        .loading-indicator.show::after {
+            content: '...';
+            animation: pulse 1.5s infinite;
+        }
+        
+        #console-toggle-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            border: 2px solid #ffcc00;
+            color: #ffcc00;
+            padding: 10px 12px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 99999;
+            transition: background 0.3s;
+        }
+        #console-toggle-btn:hover {
+            background: rgba(255, 204, 0, 0.9);
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <!-- 转场覆盖层 -->
+    <div class="transition-overlay" id="transition-overlay"></div>
+    
+    <!-- 镜头标题 -->
+    <div class="scene-title" id="scene-title">镜头1：衣柜视角</div>
+    
+    <!-- 加载指示器 -->
+    <div class="loading-indicator" id="loading-indicator">加载中</div>
+    
+    <!-- 控制面板 -->
+    <div class="story-controls">
+        <h4 style="margin: 0 0 10px 0; color: #ffcc00;">完整故事控制台</h4>
+        
+        <button class="control-button" onclick="goToScene(1)">镜头1：衣柜视角</button>
+        <button class="control-button" onclick="goToScene(2)">镜头2：玉佩觉醒</button>
+        <button class="control-button" onclick="goToScene(3)">镜头3：时空穿越</button>
+        <button class="control-button" onclick="goToScene(4)">镜头4：觉醒旅程</button>
+        <button class="control-button" onclick="launchScene5()">镜头5：英雄救美</button>
+        <button class="control-button" onclick="launchScene6()">镜头6：首战告捷</button>
+        <button class="control-button" onclick="launchScene7()">镜头7：未知旅程</button>
+        <button class="control-button" onclick="nextScene()" id="next-btn">下一镜头</button>
+        <button class="control-button" onclick="prevScene()" id="prev-btn">上一镜头</button>
+        <button class="control-button" onclick="restartStory()">重新开始</button>
+        <button class="control-button" onclick="toggleFullscreen()">全屏/窗口</button>
+        
+        <div class="status-info">
+            <div>当前镜头: <span id="current-scene">1</span>/5</div>
+            <div>状态: <span id="story-status">播放中</span></div>
+            <div>进度: <span id="progress">0%</span></div>
+        </div>
+        
+        <div style="margin-top: 10px; font-size: 10px; opacity: 0.6;">
+            <div>快捷键:</div>
+            <div>→ 下一镜头 | ← 上一镜头</div>
+            <div>R 重新开始 | F 全屏</div>
+            <div>1/2/3/4/5 直接跳转镜头</div>
+        </div>
+    </div>
+    
+    <!-- 镜头1容器 -->
+    <div class="scene-frame active" id="scene1-frame">
+        <iframe src="scene1.html" id="scene1-iframe"></iframe>
+    </div>
+    
+    <!-- 镜头2容器 -->
+    <div class="scene-frame" id="scene2-frame">
+        <iframe src="simple-test-scene2.html" id="scene2-iframe"></iframe>
+    </div>
+    
+    <!-- 镜头3容器 -->
+    <div class="scene-frame" id="scene3-frame">
+        <iframe data-src="scene3-time-vortex.html" id="scene3-iframe"></iframe>
+    </div>
+    
+    <!-- 镜头4容器 -->
+    <div class="scene-frame" id="scene4-frame">
+        <iframe data-src="scene4-new-awakening.html" id="scene4-iframe"></iframe>
+    </div>
+    
+    <!-- 镜头5容器 -->
+    <div class="scene-frame" id="scene5-frame">
+        <iframe data-src="scene5-new.html" id="scene5-iframe"></iframe>
+    </div>
+
+    <script>
+        // 故事管理器
+        class StoryManager {
+            constructor() {
+                this.currentScene = 1;
+                this.totalScenes = 5;
+                this.isTransitioning = false;
+                this.scene1SwitchDetected = false; // 防止重复检测镜头1切换
+                this.scenes = {
+                    1: {
+                        name: '镜头1：衣柜视角',
+                        file: 'scene1.html',
+                        iframe: 'scene1-iframe',
+                        frame: 'scene1-frame'
+                    },
+                    2: {
+                        name: '镜头2：玉佩觉醒',
+                        file: 'simple-test-scene2.html',
+                        iframe: 'scene2-iframe',
+                        frame: 'scene2-frame'
+                    },
+                    3: {
+                        name: '镜头3：时空穿越',
+                        file: 'scene3-time-vortex.html',
+                        iframe: 'scene3-iframe',
+                        frame: 'scene3-frame'
+                    },
+                    4: {
+                        name: '镜头4：觉醒旅程',
+                        file: 'scene4-new-awakening.html',
+                        iframe: 'scene4-iframe',
+                        frame: 'scene4-frame'
+                    },
+                    5: {
+                        name: '镜头5：英雄救美',
+                        file: 'scene5-new.html',
+                        iframe: 'scene5-iframe',
+                        frame: 'scene5-frame'
+                    }
+                };
+                
+                this.init();
+            }
+            
+            init() {
+                console.log('🎬 故事管理器初始化');
+                this.updateUI();
+                this.setupEventListeners();
+                this.setupSceneListeners();
+                
+                // 初始化第一个镜头
+                this.showLoadingIndicator('正在加载镜头1...');
+                this.hideLoadingIndicator(2000);
+            }
+            
+            // 设置事件监听器
+            setupEventListeners() {
+                // 键盘快捷键
+                document.addEventListener('keydown', (e) => {
+                    if (this.isTransitioning) return;
+                    
+                    switch(e.key) {
+                        case 'ArrowRight':
+                            this.nextScene();
+                            break;
+                        case 'ArrowLeft':
+                            this.prevScene();
+                            break;
+                        case 'r':
+                        case 'R':
+                            this.restartStory();
+                            break;
+                        case 'f':
+                        case 'F':
+                            this.toggleFullscreen();
+                            break;
+                        case '1':
+                            this.goToScene(1);
+                            break;
+                        case '2':
+                            this.goToScene(2);
+                            break;
+                        case '3':
+                            this.goToScene(3);
+                            break;
+                        case '4':
+                            this.goToScene(4);
+                            break;
+                        case '5':
+                            this.goToScene(5);
+                            break;
+                    }
+                });
+                
+                // 监听页面可见性变化
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        this.pauseCurrentScene();
+                    } else {
+                        this.resumeCurrentScene();
+                    }
+                });
+            }
+            
+            // 设置镜头间通信
+            setupSceneListeners() {
+                // 监听镜头1完成事件
+                window.addEventListener('message', (event) => {
+                    if (event.data.type === 'scene1-complete') {
+                        console.log('✅ 收到镜头1完成信号');
+                        // 立即转场，不等待，确保用户能看到镜头2的N001
+                        this.transitionToScene(2);
+                    } else if (event.data.type === 'scene2-complete') {
+                        console.log('✅ 收到镜头2完成信号');
+                        this.transitionToScene(3);
+                    } else if (event.data.type === 'scene3-complete') {
+                        console.log('✅ 收到镜头3完成信号');
+                        this.transitionToScene(4);
+                    } else if (event.data.type === 'scene4-complete') {
+                        console.log('✅ 收到镜头4完成信号');
+                        this.transitionToScene(5);
+                    } else if (event.data.type === 'scene5-complete') {
+                        console.log('✅ 收到镜头5完成信号');
+                        // 镜头5内部将继续播放镜头6，无需转场
+                        this.updateStatus('镜头6播放中');
+                    } else if (event.data.type === 'scene6-complete') {
+                        console.log('✅ 收到镜头6完成信号');
+                        this.updateStatus('镜头7准备中');
+                    } else if (event.data.type === 'scene7-start') {
+                        console.log('▶️ 镜头7开始播放');
+                        this.updateStatus('镜头7播放中');
+                    } else if (event.data.type === 'scene7-complete') {
+                        console.log('✅ 收到镜头7完成信号');
+                        this.updateStatus('故事完成');
+                        this.showStoryComplete();
+                    } else if (event.data.type === 'request-audio-status') {
+                        // 镜头2请求音频状态
+                        console.log('🎵 收到音频状态请求');
+                        this.sendAudioStatus(event.source);
+                    } else if (event.data.type === 'audio-unlocked-from-scene1') {
+                        // 镜头1通知音频已解锁
+                        console.log('🎵 收到镜头1音频解锁通知');
+                        this.audioUnlocked = true;
+                        this.broadcastAudioUnlocked();
+                    }
+                });
+                
+                // 音频解锁状态
+                this.audioUnlocked = false;
+                
+                // 定期检查iframe加载状态
+                this.checkIframeStatus();
+            }
+            
+            // 发送音频状态给请求的iframe
+            sendAudioStatus(targetWindow) {
+                if (this.audioUnlocked) {
+                    console.log('🎵 发送音频已解锁状态');
+                    targetWindow.postMessage({
+                        type: 'audio-unlocked'
+                    }, '*');
+                } else {
+                    console.log('🎵 音频尚未解锁，等待镜头1解锁');
+                }
+            }
+            
+            // 广播音频解锁状态给所有iframe
+            broadcastAudioUnlocked() {
+                console.log('🎵 广播音频解锁状态给所有镜头');
+                Object.keys(this.scenes).forEach(sceneNum => {
+                    const iframe = document.getElementById(this.scenes[sceneNum].iframe);
+                    if (iframe && iframe.contentWindow) {
+                        iframe.contentWindow.postMessage({
+                            type: 'audio-unlocked'
+                        }, '*');
+                    }
+                });
+            }
+            
+            // 检查iframe加载状态
+            checkIframeStatus() {
+                setInterval(() => {
+                    try {
+                        const scene1Iframe = document.getElementById('scene1-iframe');
+                        const scene2Iframe = document.getElementById('scene2-iframe');
+                        
+                        if (scene1Iframe && scene1Iframe.contentWindow) {
+                            // 检查镜头1是否有storybook实例
+                            const storybook = scene1Iframe.contentWindow.storybook;
+                            if (storybook && storybook.currentScene === 1.5 && !this.scene1SwitchDetected) {
+                                // 镜头1准备切换到下一场景
+                                console.log('🎬 检测到镜头1准备切换');
+                                this.scene1SwitchDetected = true; // 防止重复检测
+                            }
+                        }
+                    } catch (e) {
+                        // 跨域限制，忽略错误
+                    }
+                }, 2000);
+            }
+            
+            // 切换到指定镜头
+            goToScene(sceneNumber) {
+                if (sceneNumber === this.currentScene || this.isTransitioning) return;
+                if (sceneNumber < 1 || sceneNumber > this.totalScenes) return;
+                
+                this.transitionToScene(sceneNumber);
+            }
+            
+            // 下一镜头
+            nextScene() {
+                if (this.currentScene < this.totalScenes) {
+                    this.goToScene(this.currentScene + 1);
+                }
+            }
+            
+            // 上一镜头
+            prevScene() {
+                if (this.currentScene > 1) {
+                    this.goToScene(this.currentScene - 1);
+                }
+            }
+            
+            // 停止所有镜头的音频
+            stopAllAudio() {
+                console.log('🔇 停止所有镜头的音频');
+                
+                // 停止所有iframe中的音频
+                Object.keys(this.scenes).forEach(sceneNum => {
+                    const iframe = document.getElementById(this.scenes[sceneNum].iframe);
+                    console.log(`🔍 检查镜头${sceneNum}的iframe:`, iframe ? '存在' : '不存在');
+                    
+                    if (iframe) {
+                        console.log(`🔍 镜头${sceneNum}的contentWindow:`, iframe.contentWindow ? '存在' : '不存在');
+                        
+                        if (iframe.contentWindow) {
+                            try {
+                                // 发送停止音频信号
+                                console.log(`📤 向镜头${sceneNum}发送停止音频信号`);
+                                iframe.contentWindow.postMessage({type: 'stop-all-audio'}, '*');
+                            } catch (e) {
+                                console.warn(`❌ 无法向镜头${sceneNum}发送停止音频信号:`, e);
+                            }
+                        } else {
+                            console.warn(`⚠️ 镜头${sceneNum}的contentWindow不可用`);
+                        }
+                    } else {
+                        console.warn(`⚠️ 未找到镜头${sceneNum}的iframe元素`);
+                    }
+                });
+            }
+            
+            // 转场到指定镜头
+            transitionToScene(sceneNumber) {
+                if (this.isTransitioning) return;
+                
+                console.log(`🎬 开始转场: 镜头${this.currentScene} → 镜头${sceneNumber}`);
+                
+                // 停止所有镜头的音频
+                this.stopAllAudio();
+                
+                this.isTransitioning = true;
+                this.updateStatus('转场中...');
+                
+                const overlay = document.getElementById('transition-overlay');
+                const sceneTitle = document.getElementById('scene-title');
+                
+                // 显示转场效果
+                overlay.classList.add('active');
+                sceneTitle.classList.remove('show');
+                
+                setTimeout(() => {
+                    // 发送清理指令到当前iframe
+                    const currentIframeWin=document.getElementById(this.scenes[this.currentScene].iframe)?.contentWindow;
+                    if(currentIframeWin){
+                        currentIframeWin.postMessage({type:'cleanup-ui'}, '*');
+                    }
+
+                    // 隐藏当前镜头
+                    const currentFrame = document.getElementById(this.scenes[this.currentScene].frame);
+                    currentFrame.classList.remove('active');
+                    
+                    // 显示目标镜头
+                    const targetFrame = document.getElementById(this.scenes[sceneNumber].frame);
+                    targetFrame.classList.add('active');
+
+                    // 👉 通用懒加载：若目标 iframe 尚未加载，自动赋值 src
+                    const targetIframe = document.getElementById(this.scenes[sceneNumber].iframe);
+                    if (targetIframe && !targetIframe.getAttribute('src')) {
+                        console.log(`🔄 加载镜头${sceneNumber}页面`);
+                        if (targetIframe.dataset.src) {
+                            targetIframe.src = targetIframe.dataset.src;
+                        } else if (this.scenes[sceneNumber].file) {
+                            targetIframe.src = this.scenes[sceneNumber].file;
+                        }
+                    }
+                    
+                    // 更新当前镜头
+                    this.currentScene = sceneNumber;
+                    this.updateUI();
+                    
+                    // 如果切换到镜头3，确保加载完成后发送启动信号
+                    if (sceneNumber === 3) {
+                        const scene3Iframe = document.getElementById('scene3-iframe');
+                        const sendStartMsg = () => {
+                            console.log('📤 发送镜头3启动信号');
+                            scene3Iframe.contentWindow.postMessage({ type: 'scene3-start' }, '*');
+                        };
+                        if (!scene3Iframe.getAttribute('src')) {
+                            // 还未设置 src，上面懒加载逻辑已设置，此处等待 onload
+                            scene3Iframe.onload = () => setTimeout(sendStartMsg, 500);
+                        } else if (scene3Iframe.contentWindow && scene3Iframe.contentWindow.document.readyState === 'complete') {
+                            // 已经加载完成
+                            setTimeout(sendStartMsg, 200);
+                        } else {
+                            // 已设置 src 但可能未加载完成
+                            scene3Iframe.onload = () => setTimeout(sendStartMsg, 200);
+                        }
+                    }
+                    
+                    // 显示加载指示器
+                    this.showLoadingIndicator(`正在加载${this.scenes[sceneNumber].name}...`);
+                    
+                    setTimeout(() => {
+                        // 隐藏转场效果
+                        overlay.classList.remove('active');
+                        sceneTitle.classList.add('show');
+                        this.hideLoadingIndicator();
+                        
+                        this.isTransitioning = false;
+                        this.updateStatus('播放中');
+                        
+                        console.log(`✅ 转场完成: 现在是${this.scenes[sceneNumber].name}`);
+                    }, 100);  // 进一步减少到100ms
+                }, 50);   // 进一步减少到50ms
+            }
+            
+            // 重新开始故事
+            restartStory() {
+                console.log('🔄 重新开始故事');
+                
+                // 刷新所有iframe
+                Object.keys(this.scenes).forEach(sceneNum => {
+                    const iframe = document.getElementById(this.scenes[sceneNum].iframe);
+                    if (iframe) {
+                        iframe.src = iframe.src; // 重新加载
+                    }
+                });
+                
+                // 回到第一镜头
+                if (this.currentScene !== 1) {
+                    this.goToScene(1);
+                } else {
+                    this.updateStatus('已重置');
+                }
+            }
+            
+            // 暂停当前镜头
+            pauseCurrentScene() {
+                try {
+                    const currentIframe = document.getElementById(this.scenes[this.currentScene].iframe);
+                    if (currentIframe && currentIframe.contentWindow) {
+                        // 发送暂停信号
+                        currentIframe.contentWindow.postMessage({type: 'pause'}, '*');
+                    }
+                } catch (e) {
+                    console.warn('无法暂停当前镜头:', e);
+                }
+            }
+            
+            // 恢复当前镜头
+            resumeCurrentScene() {
+                try {
+                    const currentIframe = document.getElementById(this.scenes[this.currentScene].iframe);
+                    if (currentIframe && currentIframe.contentWindow) {
+                        // 发送恢复信号
+                        currentIframe.contentWindow.postMessage({type: 'resume'}, '*');
+                    }
+                } catch (e) {
+                    console.warn('无法恢复当前镜头:', e);
+                }
+            }
+            
+            // 显示故事完成
+            showStoryComplete() {
+                const overlay = document.getElementById('transition-overlay');
+                overlay.innerHTML = `
+                    <div style="
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        text-align: center;
+                        color: white;
+                        font-size: 24px;
+                    ">
+                        <h1 style="margin-bottom: 20px; color: #ffcc00;">🎊 故事完成 🎊</h1>
+                        <p style="margin-bottom: 30px; font-size: 18px;">感谢体验沉浸式动态互动绘本</p>
+                        <button onclick="storyManager.restartStory()" style="
+                            padding: 15px 30px;
+                            font-size: 16px;
+                            background: #333;
+                            color: white;
+                            border: 2px solid #ffcc00;
+                            border-radius: 25px;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                        " onmouseover="this.style.background='#555'" onmouseout="this.style.background='#333'">
+                            重新体验
+                        </button>
+                    </div>
+                `;
+                overlay.classList.add('active');
+            }
+            
+            // 更新UI显示
+            updateUI() {
+                document.getElementById('current-scene').textContent = this.currentScene;
+                document.getElementById('scene-title').textContent = this.scenes[this.currentScene].name;
+                document.getElementById('progress').textContent = Math.round((this.currentScene / this.totalScenes) * 100) + '%';
+                
+                // 更新按钮状态
+                document.getElementById('prev-btn').disabled = this.currentScene === 1;
+                document.getElementById('next-btn').disabled = this.currentScene === this.totalScenes;
+            }
+            
+            // 更新状态显示
+            updateStatus(status) {
+                document.getElementById('story-status').textContent = status;
+            }
+            
+            // 显示加载指示器
+            showLoadingIndicator(text) {
+                const indicator = document.getElementById('loading-indicator');
+                indicator.textContent = text;
+                indicator.classList.add('show');
+            }
+            
+            // 隐藏加载指示器
+            hideLoadingIndicator(delay = 0) {
+                setTimeout(() => {
+                    document.getElementById('loading-indicator').classList.remove('show');
+                }, delay);
+            }
+            
+            // 全屏切换
+            toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(e => {
+                        console.warn('无法进入全屏模式:', e);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+        }
+        
+        // 全局函数
+        let storyManager;
+        
+        function goToScene(sceneNumber) {
+            storyManager.goToScene(sceneNumber);
+        }
+        
+        function nextScene() {
+            storyManager.nextScene();
+        }
+        
+        function prevScene() {
+            storyManager.prevScene();
+        }
+        
+        function restartStory() {
+            storyManager.restartStory();
+        }
+        
+        function toggleFullscreen() {
+            storyManager.toggleFullscreen();
+        }
+        
+        function launchScene6() {
+            storyManager.goToScene(5);
+            const iframe = document.getElementById('scene5-iframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({type: 'force-start-scene6'}, '*');
+            }
+        }
+        
+        function launchScene7() {
+            storyManager.goToScene(5);
+            const iframe = document.getElementById('scene5-iframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({type: 'force-start-scene7'}, '*');
+            }
+        }
+        
+        function launchScene5() {
+            storyManager.transitionToScene(5);
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            storyManager = new StoryManager();
+            console.log('🎮 完整故事系统已启动');
+            
+            // 预加载关键视频资源
+            if (window.videoPreloader) {
+                const keyVideos = [
+                    '镜头1/1/视线清晰.mp4',
+                    '镜头2/N001.mp4',
+                    '镜头2/N002.mp4',
+                    '镜头3/1/C03001.mp4'
+                ];
+                
+                console.log('🎥 开始预加载关键视频资源...');
+                window.videoPreloader.preloadVideoList(keyVideos, (loaded, total, progress) => {
+                    console.log(`🎥 预加载进度: ${loaded}/${total} (${progress.toFixed(1)}%)`);
+                });
+            }
+        });
+        
+        // 防止右键和选择
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('selectstart', e => e.preventDefault());
+    </script>
+
+    <script>
+        let consoleVisible = false; // 全局状态
+
+        function toggleConsolePanel(){
+            const panel = document.querySelector('.story-controls');
+            if (!panel) {
+                console.error('❌ 未找到控制台面板元素');
+                return;
+            }
+
+            consoleVisible = !consoleVisible;
+            if (consoleVisible) {
+                panel.style.display = 'block';
+                panel.style.visibility = 'visible';
+                panel.style.opacity = '1';
+                console.log('🎮 控制台显示');
+            } else {
+                panel.style.display = 'none';
+                console.log('🎮 控制台隐藏');
+            }
+
+            // 发送调试信息给所有iframe
+            document.querySelectorAll('iframe').forEach(iframe=>{
+                try{
+                    iframe.contentWindow.postMessage({
+                        type:'console-toggle-result',
+                        visible: consoleVisible,
+                        timestamp: Date.now()
+                    },'*');
+                }catch(e){}
+            });
+        }
+
+        // ===== 控制台切换统一防抖 =====
+        let lastToggleTime = 0;
+        const TOGGLE_DEBOUNCE = 1000; // 毫秒，放宽窗口避免多iframe重复触发
+
+        function safeToggleConsole() {
+            const now = Date.now();
+            if (now - lastToggleTime < TOGGLE_DEBOUNCE) {
+                console.log('🛑 防抖：忽略过快的重复切换');
+                return;
+            }
+            lastToggleTime = now;
+            toggleConsolePanel();
+        }
+
+        // 监听来自子iframe的切换请求
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.type === 'toggle-console') {
+                console.log('🎮 收到来自iframe的控制台切换请求, timestamp:', e.data.timestamp);
+                safeToggleConsole();
+            }
+        });
+
+        function handleConsoleToggle(e) {
+            if (e._consoleToggleHandled) return;
+
+            const isToggleKey = ['`', '~', 't', 'T'].includes(e.key) || 
+                               ['Backquote', 'KeyT'].includes(e.code);
+
+            if (isToggleKey) {
+                e._consoleToggleHandled = true;
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🎮 主页面检测到控制台切换键:', e.key, e.code);
+                safeToggleConsole();
+            }
+        }
+        
+        // 添加多个事件监听器，确保可靠性
+        document.addEventListener('keydown', handleConsoleToggle, true); // 捕获阶段
+        document.addEventListener('keydown', handleConsoleToggle, false); // 冒泡阶段
+        
+        // 为window也添加监听器
+        window.addEventListener('keydown', handleConsoleToggle);
+
+        // 页面加载后初始化控制台为隐藏状态
+        document.addEventListener('DOMContentLoaded', () => {
+            const panel = document.querySelector('.story-controls');
+            if (panel) {
+                panel.style.display = 'none';
+                console.log('🎮 控制台初始化为隐藏状态，按 ~ 或 T 键切换显示');
+            }
+        });
+    </script>
+    
+    <!-- 引入视频预加载系统 -->
+    <script src="video-preloader.js"></script>
+
+    <!-- 在<body>末尾关闭前加入按钮元素 -->
+    <button id="console-toggle-btn" title="切换控制台">🛠️</button>
+
+    <script>
+        // 按钮点击切换控制台
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('console-toggle-btn');
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    safeToggleConsole();
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

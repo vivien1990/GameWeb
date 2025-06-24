@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调试面板测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #2a2a2a;
+            border-radius: 10px;
+        }
+        
+        .test-title {
+            color: #ffcc00;
+            margin-bottom: 15px;
+        }
+        
+        .iframe-container {
+            width: 100%;
+            height: 300px;
+            border: 2px solid #444;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .test-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .test-description {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            padding: 10px;
+            background: #333;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        
+        .status.success {
+            background: #2d5a2d;
+            color: #90EE90;
+        }
+        
+        .status.error {
+            background: #5a2d2d;
+            color: #ffaaaa;
+        }
+        
+        .control-button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .control-button:hover {
+            background: linear-gradient(45deg, #45a049, #4CAF50);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 style="color: #ffcc00; text-align: center;">🔍 调试面板测试</h1>
+        <p style="text-align: center; color: #ccc;">检查各个场景在iframe模式下是否正确隐藏了调试控制面板</p>
+        
+        <!-- 完整故事测试 -->
+        <div class="test-section">
+            <h3 class="test-title">1. 完整故事流程</h3>
+            <div class="test-description">
+                ✅ 应该显示：主故事控制台（index-story.html）<br>
+                ❌ 应该隐藏：各个场景的调试面板
+            </div>
+            <div class="iframe-container">
+                <iframe src="index-story.html" class="test-iframe" id="story-iframe"></iframe>
+            </div>
+            <div class="status" id="story-status">正在检测...</div>
+            <button class="control-button" onclick="checkStoryPanels()">检查控制面板数量</button>
+        </div>
+        
+        <!-- 镜头2独立测试 -->
+        <div class="test-section">
+            <h3 class="test-title">2. 镜头2独立运行</h3>
+            <div class="test-description">
+                ✅ 应该显示：镜头2调试面板（独立运行时）
+            </div>
+            <div class="iframe-container">
+                <iframe src="simple-test-scene2.html" class="test-iframe" id="scene2-iframe"></iframe>
+            </div>
+            <div class="status" id="scene2-status">独立运行模式</div>
+        </div>
+        
+        <!-- 镜头3独立测试 -->
+        <div class="test-section">
+            <h3 class="test-title">3. 镜头3独立运行</h3>
+            <div class="test-description">
+                ✅ 应该显示：镜头3调试面板（独立运行时）
+            </div>
+            <div class="iframe-container">
+                <iframe src="scene3-time-vortex.html" class="test-iframe" id="scene3-iframe"></iframe>
+            </div>
+            <div class="status" id="scene3-status">独立运行模式</div>
+        </div>
+        
+        <!-- 镜头4独立测试 -->
+        <div class="test-section">
+            <h3 class="test-title">4. 镜头4独立运行</h3>
+            <div class="test-description">
+                ✅ 应该显示：镜头4调试面板（独立运行时）
+            </div>
+            <div class="iframe-container">
+                <iframe src="scene4-new-awakening.html" class="test-iframe" id="scene4-iframe"></iframe>
+            </div>
+            <div class="status" id="scene4-status">独立运行模式</div>
+        </div>
+        
+        <!-- 镜头5独立测试 -->
+        <div class="test-section">
+            <h3 class="test-title">5. 镜头5独立运行</h3>
+            <div class="test-description">
+                ✅ 应该显示：镜头5调试面板（独立运行时）
+            </div>
+            <div class="iframe-container">
+                <iframe src="scene5-new.html" class="test-iframe" id="scene5-iframe"></iframe>
+            </div>
+            <div class="status" id="scene5-status">独立运行模式</div>
+        </div>
+        
+        <!-- 测试说明 -->
+        <div class="test-section">
+            <h3 class="test-title">📋 测试说明</h3>
+            <div style="color: #ccc; line-height: 1.6;">
+                <p><strong>预期结果：</strong></p>
+                <ul>
+                    <li>✅ 完整故事流程：只显示主控制台，不显示各场景的调试面板</li>
+                    <li>✅ 独立运行场景：显示对应场景的调试面板</li>
+                </ul>
+                
+                <p><strong>修复内容：</strong></p>
+                <ul>
+                    <li>为所有场景的调试面板添加了 id="debug-controls"</li>
+                    <li>在场景初始化时检测 iframe 模式</li>
+                    <li>如果检测到 window.parent !== window，自动隐藏调试面板</li>
+                </ul>
+                
+                <p><strong>快捷键：</strong></p>
+                <ul>
+                    <li>F12：打开开发者工具查看控制台输出</li>
+                    <li>在完整故事中应该看到"🖥️ 在iframe中运行，已隐藏调试控制面板"消息</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkStoryPanels() {
+            const storyIframe = document.getElementById('story-iframe');
+            const statusEl = document.getElementById('story-status');
+            
+            try {
+                // 检查iframe是否加载完成
+                if (storyIframe.contentDocument) {
+                    const doc = storyIframe.contentDocument;
+                    
+                    // 查找主控制台
+                    const storyControls = doc.querySelector('.story-controls');
+                    
+                    // 查找各种调试面板
+                    const debugPanels = doc.querySelectorAll('#debug-controls, .controls, .debug-panel');
+                    
+                    let visiblePanels = 0;
+                    let hiddenPanels = 0;
+                    
+                    debugPanels.forEach(panel => {
+                        if (panel.style.display !== 'none' && panel.offsetHeight > 0) {
+                            visiblePanels++;
+                        } else {
+                            hiddenPanels++;
+                        }
+                    });
+                    
+                    if (storyControls && visiblePanels === 1) {
+                        statusEl.className = 'status success';
+                        statusEl.textContent = `✅ 正确：只显示1个主控制台，${hiddenPanels}个调试面板已隐藏`;
+                    } else {
+                        statusEl.className = 'status error';
+                        statusEl.textContent = `❌ 错误：发现${visiblePanels}个可见控制面板，${hiddenPanels}个已隐藏`;
+                    }
+                } else {
+                    statusEl.className = 'status error';
+                    statusEl.textContent = '❌ 无法访问iframe内容（跨域限制）';
+                }
+            } catch (e) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '❌ 检测失败：' + e.message;
+            }
+        }
+        
+        // 页面加载完成后自动检测
+        window.onload = function() {
+            setTimeout(() => {
+                checkStoryPanels();
+            }, 3000); // 等待iframe加载完成
+        };
+    </script>
+</body>
+</html> 

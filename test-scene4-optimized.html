@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镜头4优化效果测试</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Microsoft YaHei', sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .test-title {
+            color: #FFD700;
+            font-size: 18px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #FFD700;
+            padding-bottom: 5px;
+        }
+        
+        .test-item {
+            margin: 10px 0;
+            padding: 8px 0;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status.optimized {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status.enhanced {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .status.new {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .launch-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .launch-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; color: #FFD700; margin-bottom: 30px;">
+        镜头4：觉醒旅程 - 完整优化版测试
+    </h1>
+    
+    <div class="test-section">
+        <div class="test-title">🎯 用户交互优化</div>
+        <div class="test-item">
+            <span class="status optimized">优化</span>
+            <strong>"触摸玉佩"按钮位置下移</strong> - 现在精确定位在玉佩位置（top: 70%）
+        </div>
+        <div class="test-item">
+            <span class="status optimized">优化</span>
+            <strong>按钮震动效果</strong> - 参考镜头2简单缩放效果，去掉复杂旋转
+        </div>
+        <div class="test-item">
+            <span class="status new">新增</span>
+            <strong>点击波纹效果</strong> - 完全复制镜头2的白色波纹扩散动画
+        </div>
+        <div class="test-item">
+            <span class="status enhanced">增强</span>
+            <strong>点击反馈</strong> - 更强烈的视觉和触感反馈
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <div class="test-title">💥 转场震撼效果</div>
+        <div class="test-item">
+            <span class="status new">使用</span>
+            <strong>EffectSystem.whiteFlash</strong> - 直接使用EffectSystem中为镜头2设计的白光闪烁
+        </div>
+        <div class="test-item">
+            <span class="status new">使用</span>
+            <strong>EffectSystem.explosionEffect</strong> - 专门标注"用于镜头2玉佩激活"的爆炸效果
+        </div>
+        <div class="test-item">
+            <span class="status new">使用</span>
+            <strong>EffectSystem.shake</strong> - 屏幕震动效果，强度8px，时长400ms
+        </div>
+        <div class="test-item">
+            <span class="status optimized">优化</span>
+            <strong>组合效果</strong> - 白光+爆炸+震动三重组合，完全还原镜头2转场
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <div class="test-title">⚔️ 武德进度条特效</div>
+        <div class="test-item">
+            <span class="status enhanced">增强</span>
+            <strong>白色发光进度条</strong> - 区别于其他绿色进度条的特殊样式
+        </div>
+        <div class="test-item">
+            <span class="status new">新增</span>
+            <strong>多层阴影效果</strong> - 内外阴影配合，营造立体发光感
+        </div>
+        <div class="test-item">
+            <span class="status new">新增</span>
+            <strong>额外光晕动画</strong> - ::before 伪元素创建的环绕光晕
+        </div>
+        <div class="test-item">
+            <span class="status enhanced">增强</span>
+            <strong>呼吸发光动画</strong> - 2.5秒周期的亮度变化
+        </div>
+        <div class="test-item">
+            <span class="status new">新增</span>
+            <strong>渐变背景</strong> - 五段渐变白色，增加质感
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <div class="test-title">🎮 完整流程体验</div>
+        <div class="test-item">
+            <strong>阶段1：</strong>自动播放 C04001-1.mp4，显示"起身"按钮
+        </div>
+        <div class="test-item">
+            <strong>阶段2：</strong>播放 c04002-1.mp4，最后一帧暂停，显示"触摸玉佩"按钮（已下移）
+        </div>
+        <div class="test-item">
+            <strong>阶段3：</strong>点击玉佩触发震动+震撼转场，播放 C04003-1.mp4，8秒时显示字幕和五维界面
+        </div>
+        <div class="test-item">
+            <strong>阶段4：</strong>播放 c04004-1.mp4（1.5倍慢速正播→倒播→正播循环）
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <div class="test-title">🎨 视觉效果总览</div>
+        <div class="test-item">
+            ✅ 所有视频保留原声，背景音乐降低至0.3音量
+        </div>
+        <div class="test-item">
+            ✅ 右侧五维属性界面，滑入动画和毛玻璃效果
+        </div>
+        <div class="test-item">
+            ✅ 武德属性白色发光特效，其他属性绿色正常样式
+        </div>
+        <div class="test-item">
+            ✅ 简洁白色字幕："这玉佩....能吸收星光？"
+        </div>
+        <div class="test-item">
+            ✅ 镜头1风格的140px圆形波纹按钮
+        </div>
+        <div class="test-item">
+            ✅ 隐藏界面滚动条，保持界面简洁
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 40px;">
+        <a href="scene4-new-awakening.html" class="launch-btn">
+            🚀 启动镜头4完整体验
+        </a>
+    </div>
+    
+    <div style="text-align: center; margin-top: 20px; color: #888; font-size: 14px;">
+        <p>🎯 找到了EffectSystem.js中专门为镜头2设计的转场效果！</p>
+        <p>现在直接使用EffectSystem.whiteFlash + explosionEffect + shake组合</p>
+        <p>这是镜头2的真正转场效果，注释中明确标注"用于镜头2玉佩激活"</p>
+    </div>
+</body>
+</html> 

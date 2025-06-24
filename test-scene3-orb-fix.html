@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镜头3球体视频延迟修复验证</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .test-button:hover {
+            background: #45a049;
+        }
+        
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+        
+        .iframe-container {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 镜头3球体视频延迟修复验证</h1>
+        
+        <div class="test-section">
+            <h2>🎯 修复内容</h2>
+            <ul>
+                <li>✅ 球体视频设置为 <code>preload="auto"</code></li>
+                <li>✅ 添加视频预加载系统支持</li>
+                <li>✅ 视频先隐藏，准备就绪后再显示</li>
+                <li>✅ 白球消失与视频显示同步</li>
+                <li>✅ 视频播放等待显示完成</li>
+                <li>✅ 增强的加载状态提示</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h2>🎮 测试控制</h2>
+            <button class="test-button" onclick="startTest()">开始测试镜头3</button>
+            <button class="test-button" onclick="skipToOrbs()">直接跳转到球体阶段</button>
+            <button class="test-button" onclick="reloadTest()">重新加载</button>
+            <button class="test-button" onclick="clearLog()">清空日志</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>📊 测试状态</h2>
+            <div class="status" id="status">准备测试...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🎬 镜头3测试</h2>
+            <div class="iframe-container">
+                <iframe id="scene3-frame" src="scene3-time-vortex.html"></iframe>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>📝 测试日志</h2>
+            <div class="log" id="log"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🔍 观察要点</h2>
+            <ul>
+                <li><strong>球体出现:</strong> 白色光球应该流畅放大到240px</li>
+                <li><strong>视频过渡:</strong> 白球消失后，视频应该立即显示，无延迟</li>
+                <li><strong>播放开始:</strong> 视频显示后应该立即开始播放，无黑屏</li>
+                <li><strong>加载提示:</strong> 如果有延迟，应该显示加载提示</li>
+                <li><strong>用户体验:</strong> 整个过程应该感觉流畅，无卡顿</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const logDiv = document.getElementById('log');
+        const iframe = document.getElementById('scene3-frame');
+        
+        function updateStatus(message) {
+            statusDiv.textContent = message;
+            addLog(`状态: ${message}`);
+        }
+        
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function startTest() {
+            updateStatus('开始测试镜头3...');
+            iframe.contentWindow.postMessage({ type: 'scene3-start' }, '*');
+            addLog('发送场景启动信号');
+        }
+        
+        function skipToOrbs() {
+            updateStatus('跳转到球体阶段...');
+            iframe.contentWindow.postMessage({ type: 'skip-to-orbs' }, '*');
+            addLog('跳转到球体探索阶段');
+        }
+        
+        function reloadTest() {
+            updateStatus('重新加载测试...');
+            iframe.src = iframe.src;
+            addLog('重新加载iframe');
+        }
+        
+        function clearLog() {
+            logDiv.innerHTML = '';
+            addLog('日志已清空');
+        }
+        
+        // 监听来自iframe的消息
+        window.addEventListener('message', (event) => {
+            if (event.data.type) {
+                addLog(`收到消息: ${event.data.type}`);
+                
+                switch(event.data.type) {
+                    case 'scene3-phase-update':
+                        updateStatus(`阶段: ${event.data.phase}`);
+                        break;
+                    case 'orb-created':
+                        addLog(`创建球体: ${event.data.name}`);
+                        break;
+                    case 'video-loading':
+                        addLog(`视频加载: ${event.data.message}`);
+                        break;
+                    case 'video-ready':
+                        addLog(`视频准备: ${event.data.message}`);
+                        break;
+                    case 'video-playing':
+                        addLog(`视频播放: ${event.data.message}`);
+                        break;
+                }
+            }
+        });
+        
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStatus('测试页面已加载，准备测试镜头3球体视频延迟修复');
+            addLog('测试环境初始化完成');
+            
+            // 等待iframe加载
+            iframe.addEventListener('load', () => {
+                addLog('镜头3页面加载完成');
+                updateStatus('镜头3已加载，可以开始测试');
+            });
+        });
+        
+        // 快捷键支持
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case '1':
+                    startTest();
+                    break;
+                case '2':
+                    skipToOrbs();
+                    break;
+                case 'r':
+                case 'R':
+                    reloadTest();
+                    break;
+                case 'c':
+                case 'C':
+                    clearLog();
+                    break;
+            }
+        });
+        
+        addLog('快捷键: 1=开始测试, 2=跳转球体, R=重载, C=清空日志');
+    </script>
+</body>
+</html> 

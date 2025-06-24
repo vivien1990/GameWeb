@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沉浸式动态互动绘本 - 模块化版本</title>
+    
+    <!-- 全局样式 -->
+    <link rel="stylesheet" href="styles/global.css">
+    <link rel="stylesheet" href="styles/scene1.css">
+    <link rel="stylesheet" href="styles/scene2.css">
+    <link rel="stylesheet" href="styles/ui-components.css">
+    <link rel="stylesheet" href="styles/animations.css">
+    
+    <!-- 配置文件 -->
+    <script src="config/global-config.js"></script>
+    <script src="config/audio-config.js"></script>
+    <script src="config/scene-config.js"></script>
+</head>
+<body>
+    <div class="story-container">
+        <!-- 场景容器 -->
+        <div id="scene-container">
+            <!-- 场景将由SceneManager动态加载 -->
+        </div>
+        
+        <!-- UI组件容器 -->
+        <div id="ui-container">
+            <!-- UI组件将由各个管理器动态创建 -->
+        </div>
+        
+        <!-- 调试面板 -->
+        <div id="debug-panel" class="debug-panel" style="display: none;">
+            <h3>调试面板</h3>
+            <div id="debug-info"></div>
+            <div class="debug-controls">
+                <button onclick="window.DebugAPI.toggleAudio()">切换音频</button>
+                <button onclick="window.DebugAPI.resetScene()">重置场景</button>
+                <button onclick="window.DebugAPI.showInfo()">显示信息</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 核心工具模块 -->
+    <script src="scripts/utils/EventBus.js"></script>
+    
+    <!-- 核心引擎模块 -->
+    <script src="scripts/core/AudioManager.js"></script>
+    <script src="scripts/core/SceneManager.js"></script>
+    <script src="scripts/core/InteractionManager.js"></script>
+    
+    <!-- 组件模块 -->
+    <script src="scripts/components/SubtitleSystem.js"></script>
+    <script src="scripts/components/EffectSystem.js"></script>
+    <script src="scripts/components/UIComponents.js"></script>
+    
+    <!-- 场景模块 -->
+    <script src="scripts/scenes/Scene1.js"></script>
+    <script src="scripts/scenes/Scene2.js"></script>
+    
+    <!-- 工具模块 -->
+    <script src="scripts/utils/ResourceLoader.js"></script>
+    <script src="scripts/utils/DebugTools.js"></script>
+    <script src="scripts/utils/GlobalKeyHandler.js"></script>
+    
+    <!-- 主初始化 -->
+    <script src="main.js"></script>
+</body>
+</html> 

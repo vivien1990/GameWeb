@@ -1,0 +1,6 @@
+# Netlify重定向配置
+# 将根目录重定向到真正的首页
+/ /GameWeb/index.html 301
+ 
+# 保持其他路径不变
+/* /:splat 200 

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镜头5优化版测试 - 新游戏网页</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+            font-family: 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+        }
+        
+        .feature-list {
+            background: rgba(0, 255, 0, 0.1);
+            padding: 15px;
+            border-left: 4px solid #4CAF50;
+            margin: 15px 0;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #333;
+            border-radius: 10px;
+        }
+        
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .comparison-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        h1, h2, h3 {
+            color: #FFD700;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎮 镜头5优化版测试页面</h1>
+        
+        <div class="section">
+            <h2>📋 优化内容汇总</h2>
+            <div class="comparison">
+                <div class="comparison-item">
+                    <h3>🎨 选择界面优化</h3>
+                    <ul>
+                        <li>✅ 透明玻璃磨砂效果背景</li>
+                        <li>✅ 选项水平排列布局</li>
+                        <li>✅ 去除黑色背景</li>
+                        <li>✅ 华丽光效和动画</li>
+                        <li>✅ 悬浮光扫动画效果</li>
+                    </ul>
+                </div>
+                
+                <div class="comparison-item">
+                    <h3>🏆 战斗胜利界面优化</h3>
+                    <ul>
+                        <li>✅ 华丽金色渐变背景</li>
+                        <li>✅ 多重光效和阴影</li>
+                        <li>✅ 分区域布局设计</li>
+                        <li>✅ 丰富的动画效果</li>
+                        <li>✅ 倒数第三帧暂停</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🎬 直接测试镜头5</h2>
+            <div class="feature-list">
+                <strong>测试流程：</strong>
+                <ol>
+                    <li>播放镜头5\1\C05001-1.mp4（原声）</li>
+                    <li>显示"发生了什么？"按钮</li>
+                    <li>播放镜头5\2\C05002-1.mp4，暂停最后一帧</li>
+                    <li>显示水平排列的选择按钮（优化版）</li>
+                    <li>选择后播放镜头5\3\C05003-2.mp4</li>
+                    <li>震撼转场效果</li>
+                    <li>播放镜头5\3\C05003-1.mp4</li>
+                    <li>倒数第三帧暂停，显示华丽战斗胜利界面</li>
+                </ol>
+            </div>
+            
+            <iframe src="scene5-new.html" title="镜头5优化版"></iframe>
+        </div>
+        
+        <div class="section">
+            <h2>🔧 测试控制</h2>
+            <p>使用以下快捷键进行测试：</p>
+            <ul>
+                <li><strong>1</strong> - 跳转到阶段1</li>
+                <li><strong>2</strong> - 跳转到阶段2</li>
+                <li><strong>3</strong> - 跳转到阶段3（显示选择界面）</li>
+                <li><strong>空格</strong> - 在阶段1点击"发生了什么？"</li>
+                <li><strong>回车</strong> - 在阶段3选择第一个选项</li>
+                <li><strong>R</strong> - 重新开始</li>
+            </ul>
+            
+            <button class="test-button" onclick="window.open('scene5-new.html', '_blank')">
+                🚀 独立窗口测试
+            </button>
+            
+            <button class="test-button" onclick="window.open('index-story.html', '_blank')">
+                📖 完整故事测试
+            </button>
+        </div>
+        
+        <div class="section">
+            <h2>🎨 美术表现特色</h2>
+            <div class="comparison">
+                <div class="comparison-item">
+                    <h3>选择界面特色</h3>
+                    <ul>
+                        <li>🔹 透明玻璃效果，融入视频背景</li>
+                        <li>🔹 水平排列，符合现代UI设计</li>
+                        <li>🔹 悬浮光扫特效</li>
+                        <li>🔹 渐变边框和阴影</li>
+                        <li>🔹 毛玻璃背景滤镜</li>
+                    </ul>
+                </div>
+                
+                <div class="comparison-item">
+                    <h3>战斗胜利界面特色</h3>
+                    <ul>
+                        <li>🏆 多层次金色渐变背景</li>
+                        <li>🏆 文字发光和跳跃动画</li>
+                        <li>🏆 分区域信息展示</li>
+                        <li>🏆 按钮光泽流动效果</li>
+                        <li>🏆 脉冲呼吸灯效果</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>⚡ 技术优化</h2>
+            <ul>
+                <li>📱 响应式布局设计</li>
+                <li>🎞️ 精确视频暂停控制</li>
+                <li>💫 CSS3动画优化</li>
+                <li>🎮 用户交互体验提升</li>
+                <li>🖥️ 高分辨率兼容</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2>📝 测试检查清单</h2>
+            <div class="feature-list">
+                <strong>请验证以下功能：</strong>
+                <ol>
+                    <li>☐ 选择界面是否为水平排列</li>
+                    <li>☐ 选择界面背景是否为透明玻璃效果</li>
+                    <li>☐ 按钮悬浮是否有光扫动画</li>
+                    <li>☐ 最终视频是否在倒数第三帧暂停</li>
+                    <li>☐ 战斗胜利界面是否华丽</li>
+                    <li>☐ 动画效果是否流畅</li>
+                    <li>☐ 各阶段过渡是否自然</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

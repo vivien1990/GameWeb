@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镜头3：穿越时空漩涡 - 代号qin</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            overflow: hidden;
+            font-family: 'Microsoft YaHei', sans-serif;
+            color: white;
+            cursor: auto;
+        }
+        
+        #scene3-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            overflow: hidden;
+        }
+        
+        /* 视频播放器 */
+        .video-player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* 眩晕模糊过渡效果 */
+        .blur-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            transition: backdrop-filter 3s ease-out, opacity 3s ease-out;
+            z-index: 2;
+        }
+        
+        .blur-overlay.clear {
+            backdrop-filter: blur(0px);
+            opacity: 0;
+        }
+        
+        /* 圆形波动按钮样式 - 与前面镜头保持一致 */
+        .continue-ripple-button {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 70%, transparent 100%);
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            z-index: 999999;
+            opacity: 0;
+            visibility: hidden;
+            animation: rippleButton 2s infinite;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            }
+
+        .continue-ripple-button::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            animation: rippleWave 2s infinite;
+            z-index: -1;
+            }
+
+        .continue-ripple-button::after {
+            content: '';
+            position: absolute;
+            width: 120%;
+            height: 120%;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: rippleWave 2s infinite 0.5s;
+            z-index: -2;
+        }
+
+        .continue-button-text {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            text-align: center;
+            font-family: 'Microsoft YaHei', sans-serif;
+            pointer-events: none;
+        }
+        
+        .continue-ripple-button:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 70%, transparent 100%);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .continue-ripple-button.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        @keyframes rippleButton {
+            0% { 
+                opacity: 0.6; 
+                transform: translate(-50%, -50%) scale(1); 
+            }
+            50% { 
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.05); 
+            }
+            100% { 
+                opacity: 0.6; 
+                transform: translate(-50%, -50%) scale(1); 
+            }
+        }
+
+        @keyframes rippleWave {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% { 
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+        
+        /* 位面探索球体容器 */
+        .exploration-orbs {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+            cursor: auto;
+        }
+        
+        /* 位面识别文字显示区域 - 对话泡泡样式，向上移动更靠近球体 */
+        .plane-text-display {
+            position: fixed;
+            bottom: 200px; /* 从80px提升到200px，更靠近球体 */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 30000;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+            transform-origin: center;
+        }
+        
+        .plane-text-display.show {
+            opacity: 1;
+            transform: translateX(-50%) scale(1.05);
+        }
+        
+        .text-content {
+            background: rgba(255, 255, 255, 0.95);
+            color: #000;
+            padding: 15px 20px;
+            border-radius: 20px;
+            border: 3px solid #333;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            text-align: center;
+            font-family: 'Microsoft YaHei', sans-serif;
+            position: relative;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 对话泡泡尾巴 */
+        .text-content::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border: 12px solid transparent;
+            border-top-color: #333;
+            bottom: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .text-content::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border: 9px solid transparent;
+            border-top-color: rgba(255, 255, 255, 0.95);
+            bottom: -21px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+        
+        /* 逐字显示效果 */
+        .typing-char {
+            opacity: 0;
+            animation: typeIn 0.15s ease-in-out forwards;
+        }
+        
+        @keyframes typeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 点击指引样式，向上移动更靠近球体 */
+        .click-guide {
+            position: fixed;
+            bottom: 270px; /* 从150px提升到270px，更靠近球体 */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 30000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            text-align: center;
+        }
+        
+        .click-guide.show {
+            opacity: 1;
+        }
+        
+        .hand-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            animation: handBounce 1.5s ease-in-out infinite;
+        }
+        
+        .guide-text {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            font-family: 'Microsoft YaHei', sans-serif;
+            animation: textPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes handBounce {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+        
+        @keyframes textPulse {
+            0%, 100% {
+                opacity: 0.7;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        
+        /* 全屏点击覆盖层 */
+        .screen-click-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 25000;
+            background: transparent;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .screen-click-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* 🌟 双层球体结构样式 */
+        .orb-container {
+            /* 基础样式由JavaScript内联设置 */
+        }
+        
+        /* 🎯 外层容器悬停效果 - 移除容器本身的外发光，只保留glowLayer */
+        .orb-container.hovering {
+            /* 移除enhancedGlow动画，避免额外的视觉干扰 */
+        }
+        
+        .orb-container.hovering .glow-layer {
+            /* 移除box-shadow，只使用background radial-gradient，避免双重发光 */
+            opacity: 1 !important;
+        }
+        
+        /* 🎯 外层容器放大状态 - 改为2.4倍（从10px放大到240px） */
+        .orb-container.enlarged {
+            animation: none !important;
+            transform: translate(-50%, -50%) scale(2.4) !important;
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+            z-index: 1000 !important;
+        }
+        
+        /* 🌟 统一球体视频样式定义 */
+        .orb-video {
+            /* 外层容器154px + 内层视频220px + clip-path(36%) = 完美贴合的外发光效果 */
+        }
+        
+        /* 移除video hover效果，避免鼠标消失问题 */
+        
+        /* 球体漂浮动画 - 保持scale(2.4)避免缩小跳跃 */
+        @keyframes orb-float {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(2.4) translateY(0px);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(2.4) translateY(-15px);
+            }
+        }
+        
+        /* 球体悬停发光效果 - 更强烈的脉冲发光 */
+        @keyframes orb-glow-pulse {
+            0%, 100% {
+                box-shadow: 
+                    0 0 25px 10px rgba(88, 145, 171, 0.7), 
+                    0 0 50px 20px rgba(88, 145, 171, 0.4),
+                    0 0 75px 30px rgba(88, 145, 171, 0.2);
+                filter: drop-shadow(0 0 15px rgba(88, 145, 171, 0.8));
+            }
+            50% {
+                box-shadow: 
+                    0 0 40px 15px rgba(88, 145, 171, 0.9), 
+                    0 0 80px 30px rgba(88, 145, 171, 0.6), 
+                    0 0 120px 40px rgba(88, 145, 171, 0.4);
+                filter: drop-shadow(0 0 30px rgba(88, 145, 171, 1));
+        }
+        }
+        
+        /* 🌟 增强的发光动画 */
+        @keyframes enhancedGlow {
+            0%, 100% { 
+                filter: brightness(1.3) saturate(1.3) hue-rotate(0deg);
+            }
+            50% { 
+                filter: brightness(1.6) saturate(1.5) hue-rotate(10deg);
+            }
+        }
+        
+        /* 🚀 球体飞出动画 - 修复鼠标消失问题，移除位置偏移 */
+        @keyframes orbFlyOut {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.8;
+                filter: brightness(1.0);
+            }
+            30% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0.9;
+                filter: brightness(1.1);
+            }
+            60% {
+                transform: translate(-50%, -50%) scale(1.8);
+                opacity: 1;
+                filter: brightness(1.2);
+        }
+            100% {
+                transform: translate(-50%, -50%) scale(2.4);
+                opacity: 1;
+                filter: brightness(1.0);
+            }
+        }
+        
+
+        
+        /* 控制面板 */
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            z-index: 10000;
+            min-width: 200px;
+            border: 1px solid #333;
+        }
+        
+        .control-button {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #666;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: background 0.3s;
+        }
+        
+        .control-button:hover {
+            background: #555;
+        }
+        
+        .status {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #666;
+            font-size: 10px;
+            opacity: 0.8;
+        }
+        
+        /* 阶段指示器 - 移到左下角避免与控制台重叠 */
+        .phase-indicator {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #FFD700;
+            padding: 8px 16px;
+            border-radius: 15px;
+            font-size: 14px;
+            z-index: 100;
+            border: 1px solid #FFD700;
+            display: none !important; /* 隐藏提示 */
+        }
+        
+        
+        
+        /* 球体消失特效 - 优化为从放大状态直接消失 */
+        .orb-disappearing {
+            animation: orbDisappear 2s ease-out forwards;
+        }
+        
+        @keyframes orbDisappear {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(2.4) rotate(0deg); /* 从2.4倍开始消失 */
+                box-shadow: 0 0 60px rgba(88, 145, 171, 1);
+            }
+            30% {
+                opacity: 0.9;
+                transform: translate(-50%, -50%) scale(3.0) rotate(180deg); /* 稍微继续放大 */
+                box-shadow: 0 0 120px rgba(88, 145, 171, 1.2);
+            }
+            60% {
+                opacity: 0.6;
+                transform: translate(-50%, -50%) scale(4.2) rotate(270deg); /* 继续放大旋转 */
+                box-shadow: 0 0 180px rgba(88, 145, 171, 1);
+            }
+            80% {
+                opacity: 0.3;
+                transform: translate(-50%, -50%) scale(6.0) rotate(360deg); /* 更大更亮 */
+                box-shadow: 0 0 240px rgba(88, 145, 171, 0.8);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(8.4) rotate(540deg); /* 最终巨大消失 */
+                box-shadow: none;
+            }
+        }
+        
+        /* 光环扩散特效 */
+        .orb-glow-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(88, 145, 171, 0.8);
+            transform: translate(-50%, -50%);
+            animation: glowRingExpand 2s ease-out;
+            pointer-events: none;
+        }
+        
+        @keyframes glowRingExpand {
+            0% {
+                width: 100%;
+                height: 100%;
+                border-width: 3px;
+                opacity: 1;
+            }
+        }
+
+        
+        /* 粒子爆散特效 */
+        .orb-particles {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, rgba(88, 145, 171, 1) 0%, rgba(88, 145, 171, 0.8) 50%, transparent 100%);
+            border-radius: 50%;
+            animation: particleExplosion 1.5s ease-out;
+        }
+        
+        @keyframes particleExplosion {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--dx), var(--dy)) scale(0.2);
+            }
+        }
+        
+        /* 🌟 新增发光脉冲动画 */
+        @keyframes glowPulse {
+            0%, 100% { 
+                filter: brightness(1) saturate(1);
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% { 
+                filter: brightness(1.3) saturate(1.2);
+                transform: translate(-50%, -50%) scale(1.05);
+            }
+        }
+        
+        /* 🎆 泡泡爆掉消失效果 - 从2倍开始 */
+        @keyframes bubblePop {
+            0% {
+                transform: translate(-50%, -50%) scale(2);
+                opacity: 1;
+                filter: brightness(1) blur(0px);
+            }
+            25% {
+                transform: translate(-50%, -50%) scale(2.5);
+                opacity: 0.6;
+                filter: brightness(1.2) blur(1px);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(3);
+                opacity: 0.3;
+                filter: brightness(1.5) blur(3px);
+                border-radius: 30%;
+            }
+            75% {
+                transform: translate(-50%, -50%) scale(3.5);
+                opacity: 0.1;
+                filter: brightness(2) blur(5px);
+                border-radius: 10%;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(4);
+                opacity: 0;
+                filter: brightness(3) blur(8px);
+                border-radius: 0%;
+            }
+        }
+        
+        /* 🎆 粒子爆炸增强效果 */
+        @keyframes particleExplosion {
+            0% {
+                transform: scale(0) translate(0, 0);
+                opacity: 1;
+                filter: brightness(2);
+            }
+            30% {
+                transform: scale(1.5) translate(var(--dx), var(--dy));
+                opacity: 0.9;
+                filter: brightness(1.8);
+            }
+            70% {
+                transform: scale(2) translate(calc(var(--dx) * 2), calc(var(--dy) * 2));
+                opacity: 0.4;
+                filter: brightness(1.2);
+            }
+            100% {
+                transform: scale(0.5) translate(calc(var(--dx) * 3), calc(var(--dy) * 3));
+                opacity: 0;
+                filter: brightness(0.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="scene3-container">
+        <!-- 主视频播放器 -->
+        <video class="video-player" id="main-video" preload="auto">
+            您的浏览器不支持视频播放。
+        </video>
+        
+        <!-- 音频播放器 -->
+        <audio id="background-audio" preload="auto">
+            您的浏览器不支持音频播放。
+        </audio>
+        
+        <!-- 阶段1音效播放器 -->
+        <audio id="phase1-audio" preload="auto">
+            您的浏览器不支持音频播放。
+        </audio>
+        
+        <!-- 球体音效播放器 -->
+        <audio id="orb-sound" preload="auto">
+            您的浏览器不支持音频播放。
+        </audio>
+        
+        <!-- 眩晕模糊过渡层 -->
+        <div class="blur-overlay" id="blur-overlay"></div>
+        
+        <!-- 点击继续提示 -->
+        <div class="continue-ripple-button" id="click-continue">
+            <div class="continue-button-text">点击继续</div>
+        </div>
+        
+        <!-- 位面探索球体容器 -->
+        <div class="exploration-orbs" id="exploration-orbs">
+            <!-- 球体将通过JavaScript动态创建 -->
+        </div>
+        
+        <!-- 位面识别文字显示区域 -->
+        <div id="plane-text-display" class="plane-text-display">
+            <div class="text-content"></div>
+        </div>
+        
+        <!-- 点击指引 -->
+        <div id="click-guide" class="click-guide">
+            <div class="hand-icon">👆</div>
+            <div class="guide-text">点击屏幕继续</div>
+        </div>
+        
+        <!-- 全屏点击覆盖层 -->
+        <div id="screen-click-overlay" class="screen-click-overlay"></div>
+        
+        <!-- 阶段指示器 -->
+        <div class="phase-indicator" id="phase-indicator">
+            阶段1：眩晕苏醒
+        </div>
+        
+        <!-- 控制面板 -->
+        <div class="controls" id="debug-controls">
+            <h4 style="margin: 0 0 10px 0; color: #ffcc00;">镜头3：时空穿越</h4>
+            <button class="control-button" onclick="startScene()">开始场景</button>
+            <button class="control-button" onclick="skipToExploration()">跳转到位面探索</button>
+            <button class="control-button" onclick="skipToConfirm()">跳转到确认穿越</button>
+            <button class="control-button" onclick="restartScene()">重新开始</button>
+            <button class="control-button" onclick="nextScene()">下一镜头</button>
+            
+            <div class="status">
+                <div>状态: <span id="scene-status">准备中</span></div>
+                <div>阶段: <span id="current-phase">眩晕苏醒</span></div>
+                <div>进度: <span id="scene-progress">0%</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/keyboardToggle.js"></script>
+
+    <script>
+        class Scene3TimeVortex {
+            constructor() {
+                this.container = document.getElementById('scene3-container');
+                this.mainVideo = document.getElementById('main-video');
+                this.backgroundAudio = document.getElementById('background-audio');
+                this.phase1Audio = document.getElementById('phase1-audio');
+                this.orbSound = document.getElementById('orb-sound');
+                this.blurOverlay = document.getElementById('blur-overlay');
+                this.clickContinue = document.getElementById('click-continue');
+                this.explorationOrbs = document.getElementById('exploration-orbs');
+                this.phaseIndicator = document.getElementById('phase-indicator');
+                this.planeTextDisplay = document.getElementById('plane-text-display');
+                this.clickGuide = document.getElementById('click-guide');
+                this.screenClickOverlay = document.getElementById('screen-click-overlay');
+                
+                // 状态指示器
+                this.sceneStatus = document.getElementById('scene-status');
+                this.currentPhase = document.getElementById('current-phase');
+                this.sceneProgress = document.getElementById('scene-progress');
+                
+                // 场景状态
+                this.phase = 1; // 1:眩晕苏醒, 2:漩涡全景, 3:位面探索, 4:确认穿越
+                this.isStarted = false;
+                this.continueClicked = false;
+                this.completedOrbs = 0; // 记录已完成播放的球体数量
+                this.userInteracted = false; // 记录用户是否已交互
+                this.currentOrbIndex = 0; // 当前球体索引
+                this.inOrbPhase = false; // 标记是否在球体阶段
+                this.currentOrbContainer = null; // 当前正在播放的球体容器
+                this.currentOrbVideo = null; // 当前正在播放的球体视频
+                
+                // 视频资源路径
+                this.videos = {
+                    dizzy: '镜头3/1/C03001.mp4',        // 眩晕苏醒和漩涡全景
+                    orb1: '镜头3/2/C03002-1.mp4',      // 位面1视频
+                    orb2: '镜头3/2/C03002-2.mp4',      // 位面2视频
+                    orb3: '镜头3/2/C03002-3.mp4',      // 位面3视频
+                    orb4: '镜头3/2/C03002-4.mp4',      // 位面4视频
+                    confirm: '镜头3/3/C03003.mp4'       // 确认穿越
+                };
+                
+                // 音频资源
+                this.audio = {
+                    background: '镜头3/1/S03002.MP3',       // 背景音乐（全程循环）
+                    phase1Audio: '镜头3/1/S03001.MP3',      // 阶段1音效（5秒后播放）
+                    orbSound: '镜头3/2/pong.MP3'            // 球体出现音效
+                };
+                
+                // 位面数据
+                this.orbs = [
+                    { 
+                        id: 'orb1', 
+                        name: '草船借箭', 
+                        position: { x: '25%', y: '20%' }, 
+                        video: 'orb1',
+                        text: '这是...草船借箭？！'
+                    },
+                    { 
+                        id: 'orb2', 
+                        name: '女皇朝堂', 
+                        position: { x: '75%', y: '25%' }, 
+                        video: 'orb2',
+                        text: '朝堂高坐的这是女皇武则天？'
+                    },
+                    { 
+                        id: 'orb3', 
+                        name: '郑和下西洋', 
+                        position: { x: '20%', y: '70%' }, 
+                        video: 'orb3',
+                        text: '郑和下西洋！？'
+                    },
+                    { 
+                        id: 'orb4', 
+                        name: '九尾狐', 
+                        position: { x: '70%', y: '65%' }, 
+                        video: 'orb4',
+                        text: '嗯？九...九尾狐？！'
+                    }
+                ];
+                
+                this.selectedOrb = null;
+                
+                this.init();
+            }
+            
+            init() {
+                console.log('🎬 镜头3：时空漩涡初始化');
+                
+                // 检查是否在iframe中运行，如果是则隐藏控制面板
+                if (window.parent !== window) {
+                    const debugControls = document.getElementById('debug-controls');
+                    if (debugControls) {
+                        debugControls.style.display = 'none';
+                        console.log('🖥️ 在iframe中运行，已隐藏调试控制面板');
+                    }
+                }
+                
+                this.updateStatus('准备中...');
+                this.setupEventListeners();
+                
+                // 预加载视频资源
+                this.preloadResources();
+                
+                // 自动开始场景
+                setTimeout(() => {
+                    this.startScene();
+                }, 1000);
+            }
+            
+            preloadResources() {
+                // 预加载主要视频和背景音乐
+                this.mainVideo.src = this.videos.dizzy;
+                this.backgroundAudio.src = this.audio.background;
+                
+                // 预加载阶段1音效和球体音效
+                this.phase1Audio.src = this.audio.phase1Audio;
+                this.orbSound.src = this.audio.orbSound;
+                
+                // 使用视频预加载系统
+                if (window.videoPreloader) {
+                    console.log('🎥 开始预加载镜头3所有视频...');
+                    const allVideos = [
+                        this.videos.dizzy,
+                        this.videos.orb1,
+                        this.videos.orb2, 
+                        this.videos.orb3,
+                        this.videos.orb4,
+                        this.videos.confirm
+                    ];
+                    
+                    window.videoPreloader.preloadVideoList(allVideos, (loaded, total, progress) => {
+                        console.log(`🎥 镜头3视频预加载进度: ${loaded}/${total} (${progress.toFixed(1)}%)`);
+                    });
+                }
+                
+                console.log('📦 预加载视频和音频资源完成');
+            }
+            
+            setupEventListeners() {
+                // 点击继续事件
+                this.clickContinue.addEventListener('click', () => {
+                    this.handleContinueClick();
+                });
+                
+                // 视频播放事件
+                this.mainVideo.addEventListener('loadeddata', () => {
+                    console.log('📹 视频加载完成');
+                });
+                
+                this.mainVideo.addEventListener('ended', () => {
+                    this.handleVideoEnded();
+                });
+                
+                // 全屏点击事件（漩涡全景阶段）
+                this.container.addEventListener('click', (e) => {
+                    if (this.phase === 2 && !this.continueClicked && e.target === this.container) {
+                        this.handleContinueClick();
+                    }
+                });
+                
+                // 全屏覆盖层点击事件（球体播放完成后）
+                this.screenClickOverlay.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (this.currentOrbContainer && this.currentOrbVideo) {
+                        const orbData = this.orbs.find(orb => this.currentOrbVideo.id === orb.id);
+                        if (orbData) {
+                            this.handleOrbClick(orbData, this.currentOrbContainer, this.currentOrbVideo);
+                        }
+                    }
+                });
+            }
+            
+            startScene() {
+                if (this.isStarted) return;
+                
+                console.log('🌀 开始镜头3：时空穿越');
+                this.isStarted = true;
+                this.userInteracted = true; // 标记用户已交互
+                
+                // 🎵 开始播放背景音乐S03002.MP3（全程循环）
+                this.backgroundAudio.src = this.audio.background;
+                this.backgroundAudio.loop = true; // 循环播放
+                this.backgroundAudio.volume = 0.6;
+                this.backgroundAudio.currentTime = 0;
+                this.backgroundAudio.muted = false;
+                
+                this.backgroundAudio.play().then(() => {
+                    console.log('✅ 背景音乐S03002.MP3开始循环播放');
+                }).catch(e => {
+                    console.log('❌ 背景音乐播放失败:', e);
+                });
+                
+                this.startPhase1();
+            }
+            
+            // 阶段1：眩晕苏醒（0-5秒）
+            startPhase1() {
+                this.phase = 1;
+                this.updatePhase('阶段1：眩晕苏醒');
+                this.updateStatus('眩晕苏醒中...');
+                this.updateProgress(10);
+                
+                console.log('😵 阶段1：眩晕苏醒开始');
+                
+                // 🎬 C03001现在是纯视频，静音循环播放
+                this.mainVideo.src = this.videos.dizzy;
+                this.mainVideo.currentTime = 0;
+                this.mainVideo.muted = true; // 纯视频，静音播放
+                this.mainVideo.loop = true; // 循环播放
+                this.mainVideo.autoplay = true;
+                
+                // 播放纯视频
+                this.mainVideo.play().then(() => {
+                    console.log('✅ C03001纯视频循环播放成功！');
+                }).catch(e => {
+                    console.log('❌ C03001视频播放失败:', e);
+                });
+                
+                // 模糊过渡效果（3秒内从模糊到清晰）
+                setTimeout(() => {
+                    this.blurOverlay.classList.add('clear');
+                }, 2000);
+                
+                // 🎵 3秒后播放阶段1音效S03001.MP3（提前2秒）
+                setTimeout(() => {
+                    this.phase1Audio.volume = 0.7;
+                    this.phase1Audio.currentTime = 0;
+                    this.phase1Audio.play().then(() => {
+                        console.log('✅ 阶段1音效S03001.MP3开始播放（提前2秒）');
+                    }).catch(e => {
+                        console.log('❌ 阶段1音效播放失败:', e);
+                    });
+                }, 3000);
+                
+                // 9秒后进入阶段2（原来是5秒，现在改为9秒，符合用户方案）
+                setTimeout(() => {
+                    this.startPhase2();
+                }, 9000);
+            }
+            
+
+
+            handleContinueClick() {
+                if (this.phase !== 2 || this.continueClicked) return;
+                
+                console.log('👆 用户点击继续');
+                this.continueClicked = true;
+                this.userInteracted = true;
+                
+                // S03002.MP3背景音乐已在场景开始时播放，继续进入阶段3
+                console.log('🎵 S03002.MP3背景音乐继续播放，进入阶段3');
+                
+                // 隐藏继续按钮
+                this.clickContinue.classList.remove('show');
+                this.clickContinue.style.display = 'none';
+                
+                setTimeout(() => {
+                    this.startPhase3();
+                }, 500);
+            }
+            
+            // 阶段2：漩涡全景（5-10秒）
+            startPhase2() {
+                this.phase = 2;
+                this.updatePhase('阶段2：漩涡全景');
+                this.updateStatus('漩涡全景展示...');
+                this.updateProgress(30);
+                
+                console.log('🌀 阶段2：漩涡全景开始');
+                
+                // C03001继续循环播放（已经在阶段1设置）
+                // 背景音乐S03002.MP3继续播放（已经在startScene开始）
+                
+                console.log('🎵 阶段2：继续播放C03001视频和S03002背景音乐');
+                
+                // 显示点击继续提示（提前3秒出现）
+                setTimeout(() => {
+                    if (this.phase === 2 && !this.inOrbPhase && !this.continueClicked) { // 确保只在阶段2显示，且不在球体阶段
+                        this.clickContinue.style.display = 'flex'; // 重置显示
+                        this.clickContinue.style.visibility = 'visible';
+                        this.clickContinue.style.pointerEvents = 'auto';
+                        this.clickContinue.style.zIndex = '999999';
+                        this.clickContinue.classList.add('show');
+                    }
+                }, 0); // 立即显示，提前3秒
+            }
+            
+            // 阶段3：位面探索（10-20秒）
+            startPhase3() {
+                this.phase = 3;
+                this.updatePhase('阶段3：位面探索');
+                this.updateStatus('位面探索中...');
+                this.updateProgress(60);
+                
+                console.log('🔮 阶段3：位面探索开始');
+                
+                // 🔧 设置球体阶段标记，彻底隐藏"点击继续"按钮
+                this.inOrbPhase = true;
+                this.clickContinue.classList.remove('show');
+                this.clickContinue.style.display = 'none';
+                this.clickContinue.style.visibility = 'hidden';
+                this.clickContinue.style.opacity = '0';
+                this.clickContinue.style.pointerEvents = 'none';
+                this.clickContinue.style.zIndex = '-1';
+                
+                // 🎬 保持背景视频循环播放，不要停止
+                this.mainVideo.loop = true;
+                
+                // 创建4个探索球体
+                this.createExplorationOrbs();
+            }
+            
+            createExplorationOrbs() {
+                console.log('🌀 开始创建单个球体序列');
+                this.currentOrbIndex = 0; // 当前球体索引
+                this.createNextOrb(); // 创建第一个球体
+            }
+            
+            createNextOrb() {
+                if (this.currentOrbIndex >= this.orbs.length) {
+                    console.log('🎉 所有球体已完成');
+                    this.startPhase4();
+                    return;
+                }
+                
+                const orbData = this.orbs[this.currentOrbIndex];
+                console.log(`🚀 创建球体 ${this.currentOrbIndex + 1}/4: ${orbData.name}`);
+                this.createSingleOrbInCenter(orbData);
+            }
+            
+            createSingleOrbInCenter(orbData) {
+                console.log(`🎯 创建中央球体: ${orbData.name}`);
+                
+                // 🌟 创建双层结构：外层容器 + 内层视频
+                const orbContainer = document.createElement('div');
+                orbContainer.className = 'orb-container';
+                orbContainer.id = `container-${orbData.id}`;
+                
+                // 创建球体视频元素（内层）
+                const orbVideo = document.createElement('video');
+                orbVideo.id = orbData.id;
+                orbVideo.className = 'orb-video';
+                orbVideo.src = this.videos[orbData.video];
+                orbVideo.preload = 'auto'; // 改为auto，确保视频完全预加载
+                orbVideo.muted = true; // 初始静音，播放时再开启声音
+                orbVideo.loop = false; // 单次播放，不循环
+                orbVideo.controls = false;
+                orbVideo.autoplay = false; // 稍后通过代码控制播放
+                
+                // 添加视频预加载支持
+                if (window.videoPreloader) {
+                    window.videoPreloader.preloadVideo(this.videos[orbData.video]);
+                }
+                
+                // 🌟 外层容器样式：从0开始，出现动画到200px
+                orbContainer.style.cssText = `
+                    position: absolute;
+                    left: 50%;
+                    top: 50%;
+                    width: 10px;
+                    height: 10px;
+                    cursor: pointer;
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1);
+                    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                    z-index: 100;
+                    pointer-events: auto;
+                    cursor: pointer;
+                    border-radius: 50%;
+                    
+                    /* 外发光现在由独立的glowLayer处理 */
+                        
+                    /* 移除初始发光球背景，避免视频内部出现蓝色发光 */
+                    background: transparent;
+                `;
+                
+                // 🌟 内层视频样式：使用百分比尺寸，跟随容器从10px到200px同步缩放
+                orbVideo.style.cssText = `
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                    left: 50%;
+                    top: 50%;
+                    transform: translate(-50%, -50%);
+                    border-radius: 50%;
+                    object-fit: cover;
+                    object-position: center center;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                    z-index: 10;
+                    border: none !important;
+                    box-shadow: none !important;
+                    isolation: isolate;
+                `;
+                
+
+                
+                // 创建白色光球层，在飞出过程中覆盖视频，到达200px后消失
+                const whiteLightBall = document.createElement('div');
+                whiteLightBall.className = 'white-light-ball';
+                whiteLightBall.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
+                    background: radial-gradient(circle, 
+                        rgba(255, 255, 255, 1.0) 0%, 
+                        rgba(255, 255, 255, 1.0) 30%, 
+                        rgba(255, 255, 255, 0.95) 60%, 
+                        rgba(255, 255, 255, 0.8) 80%,
+                        rgba(255, 255, 255, 0.3) 95%,
+                        transparent 100%) !important;
+                    z-index: 15;
+                    opacity: 1;
+                    transition: opacity 1.5s ease;
+                    pointer-events: none;
+                    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5) !important;
+                    filter: none !important;
+                    border: none !important;
+                    mix-blend-mode: normal !important;
+                    isolation: isolate;
+                `;
+                
+                // 创建外发光层，移除box-shadow避免双圈效果，只使用单一渐变
+                const glowLayer = document.createElement('div');
+                glowLayer.className = 'glow-layer';
+                glowLayer.style.cssText = `
+                    position: absolute;
+                    top: -35%;
+                    left: -35%;
+                    width: 170%;
+                    height: 170%;
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 1;
+                    opacity: 0.9;
+                    transition: opacity 0.5s ease;
+                    background: radial-gradient(
+                        ellipse 32% 32% at 49.2% 48.7%,
+                        transparent 0%,
+                        transparent 35%,
+                        rgba(63, 252, 255, 0.3) 40%,
+                        rgba(63, 252, 255, 0.5) 50%,
+                        rgba(63, 252, 255, 0.7) 60%,
+                        rgba(63, 252, 255, 0.5) 70%,
+                        rgba(63, 252, 255, 0.3) 80%,
+                        rgba(63, 252, 255, 0.2) 90%,
+                        rgba(63, 252, 255, 0.1) 95%,
+                        transparent 100%
+                    );
+                `;
+                
+                // 组装结构：外发光在底层，视频在中层，白色光球在顶层（但透明）
+                orbContainer.appendChild(glowLayer);
+                orbContainer.appendChild(orbVideo);
+                orbContainer.appendChild(whiteLightBall);
+                
+                // 🔧 事件处理：绑定到外层容器
+                orbContainer.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log(`🖱️ 球体被点击: ${orbData.name}`);
+                    this.handleOrbClick(orbData, orbContainer, orbVideo);
+                });
+                
+                // 🎬 提前暂停机制，避免黑屏问题
+                orbVideo.addEventListener('timeupdate', () => {
+                    if (orbVideo.duration && orbVideo.currentTime >= orbVideo.duration - 0.15) { // 提前0.15秒暂停
+                        orbVideo.pause();
+                        console.log(`✅ 球体视频在最后一帧前暂停，避免黑屏: ${orbData.name}`);
+                    }
+                });
+                
+                // 🎬 视频播放完成备用处理
+                orbVideo.addEventListener('ended', () => {
+                    console.log(`✅ 球体视频播放完成，停留在最后一帧: ${orbData.name}`);
+                    // 视频自然结束，停留在最后一帧，等待用户点击
+                    // 不重播，避免黑屏问题
+                });
+                
+                // 🎬 确保视频完全加载后开始播放
+                orbVideo.addEventListener('loadeddata', () => {
+                    console.log(`📽️ 球体视频数据已加载: ${orbData.name}`);
+                });
+                
+                // 🎬 播放开始时的日志
+                orbVideo.addEventListener('play', () => {
+                    console.log(`▶️ 球体视频开始播放: ${orbData.name}`);
+                });
+                
+                // 🎬 播放进度监控（可选，用于调试）
+                orbVideo.addEventListener('timeupdate', () => {
+                    // 静默监控，不输出过多日志
+                });
+                
+                // 鼠标悬停效果 - 强化鼠标事件稳定性
+                orbContainer.addEventListener('mouseenter', (e) => {
+                    e.stopPropagation();
+                    if (!orbContainer.classList.contains('enlarged') && !orbContainer.classList.contains('clicked')) {
+                        orbContainer.classList.add('hovering');
+                        // 强制确保元素可见和可交互
+                        orbContainer.style.visibility = 'visible';
+                        orbContainer.style.opacity = '1';
+                        orbContainer.style.pointerEvents = 'auto';
+                        orbContainer.style.cursor = 'pointer';
+                        orbContainer.style.zIndex = '100';
+                        
+                        // 增强外发光
+                        const glowLayer = orbContainer.querySelector('.glow-layer');
+                        if (glowLayer) {
+                            glowLayer.style.opacity = '1.5';
+                        }
+                    }
+                });
+                
+                orbContainer.addEventListener('mouseleave', (e) => {
+                    e.stopPropagation();
+                    if (!orbContainer.classList.contains('enlarged') && !orbContainer.classList.contains('clicked')) {
+                        orbContainer.classList.remove('hovering');
+                        
+                        // 恢复默认外发光强度
+                        const glowLayer = orbContainer.querySelector('.glow-layer');
+                        if (glowLayer) {
+                            glowLayer.style.opacity = '0.9'; // 恢复默认发光
+                        }
+                    }
+                });
+                
+                // 添加额外的鼠标事件保障
+                orbContainer.addEventListener('mouseover', (e) => {
+                    e.stopPropagation();
+                    if (!orbContainer.classList.contains('enlarged') && !orbContainer.classList.contains('clicked')) {
+                        orbContainer.style.pointerEvents = 'auto';
+                    }
+                });
+                
+                this.explorationOrbs.appendChild(orbContainer);
+                
+                // 🌟 优化的球体出现动画：白色光球和视频同步放大，然后白球消失
+                setTimeout(() => {
+                                    // 🎵 每出现一个球，播放一次pong.MP3（增大音量）
+                    this.orbSound.currentTime = 0;
+                this.orbSound.volume = 1.0; // 增大音量从0.8到1.0
+                    this.orbSound.play().then(() => {
+                    console.log(`✅ 球体${orbData.name}出现音效pong.MP3播放成功（音量1.0）`);
+                    }).catch(e => {
+                        console.log(`❌ 球体${orbData.name}出现音效播放失败:`, e);
+                    });
+                    
+                    // 📝 显示球体对应的识别文字（逐字显示）
+                    this.showPlaneText(orbData.text);
+                    
+                    // 阶段1：在放大开始前，立即设置视频的最终状态，避免后续缩放
+                    orbVideo.style.clipPath = 'ellipse(36% 36% at 49.2% 48.7%)';
+                    orbVideo.style.webkitClipPath = 'ellipse(36% 36% at 49.2% 48.7%)';
+                    orbVideo.style.border = 'none';
+                    orbVideo.style.opacity = '0'; // 先隐藏视频，等加载完成后再显示
+                    
+                    // 球从10px变大到240px，白色光球和视频同步放大
+                    orbContainer.style.width = '240px';
+                    orbContainer.style.height = '240px';
+                    orbContainer.style.background = 'transparent';
+                    orbContainer.style.animation = 'orbFlyOut 0.6s ease-out forwards';
+                    
+                    // 外发光开始显示
+                    glowLayer.style.opacity = '0.9';
+                    
+                    setTimeout(() => {
+                        // 阶段2：500ms开始白球→视频平滑过渡
+                        
+                        // 530ms: 检查视频是否准备好，如果准备好了再开始白球消失和视频显示
+                        setTimeout(() => {
+                            const checkVideoAndTransition = () => {
+                                if (orbVideo.readyState >= 2) { // HAVE_CURRENT_DATA或更高
+                                    console.log(`✅ 球体视频已准备，开始白球→视频过渡: ${orbData.name}`);
+                                    
+                                    // 白球开始消失
+                                    whiteLightBall.style.transition = 'opacity 70ms linear'; // 70ms渐进消失
+                                    whiteLightBall.style.opacity = '0';
+                                    
+                                    // 视频开始显示
+                                    orbVideo.style.transition = 'opacity 70ms linear';
+                                    orbVideo.style.opacity = '1';
+                                } else {
+                                    console.log(`⏳ 球体视频未准备好，延迟过渡: ${orbData.name}, readyState: ${orbVideo.readyState}`);
+                                    
+                                    // 显示加载状态
+                                    if (window.videoPreloader) {
+                                        window.videoPreloader.showLoading(`位面球体准备中... (${orbData.name})`);
+                                    }
+                                    
+                                    // 50ms后重新检查
+                                    setTimeout(checkVideoAndTransition, 50);
+                                }
+                            };
+                            
+                            checkVideoAndTransition();
+                        }, 30);
+                        
+                        // 外发光适度增强
+                        setTimeout(() => {
+                            glowLayer.style.opacity = '1.2';
+                        }, 100);
+                        
+                        // 外层容器开始漂浮，完全移除动画避免scale跳跃
+                        setTimeout(() => {
+                            // 移除orbFlyOut动画，手动设置最终状态
+                            orbContainer.style.animation = 'none';
+                            orbContainer.style.transform = 'translate(-50%, -50%) scale(2)';
+                            orbContainer.style.transition = 'transform 0.1s ease';
+                            
+                            // 短暂延迟后开始漂浮
+                            setTimeout(() => {
+                                orbContainer.style.animation = 'orb-float 3s ease-in-out infinite';
+                            }, 20);
+                        }, 100);
+                
+                        // 确保球体可交互
+                        orbContainer.style.pointerEvents = 'auto';
+                        orbContainer.style.cursor = 'pointer';
+                        orbContainer.style.zIndex = '100';
+                        
+
+                        
+                        // 🎬 设置当前球体引用
+                        this.currentOrbContainer = orbContainer;
+                        this.currentOrbVideo = orbVideo;
+                        
+                        // 🎬 等待视频完全显示后再开始播放（延迟到白球消失后）
+                        setTimeout(() => {
+                            const startVideoPlayback = () => {
+                                // 确保视频已经显示（opacity = 1）且准备播放
+                                if (orbVideo.style.opacity === '1' && orbVideo.readyState >= 3) {
+                                    orbVideo.currentTime = 0;
+                                    orbVideo.muted = false; // 球体视频有声音
+                                    orbVideo.volume = 0.8;
+                                    
+                                    // 隐藏加载提示
+                                    if (window.videoPreloader) {
+                                        window.videoPreloader.hideLoading();
+                                    }
+                                    
+                                    orbVideo.play().then(() => {
+                                        console.log(`✅ 球体视频自动播放开始: ${orbData.name}`);
+                                        
+                                        // 🎬 视频开始播放后，延迟2秒显示点击指引（在对话泡泡显示完成后）
+                                        setTimeout(() => {
+                                            this.showClickGuide();
+                                        }, 2000);
+                                    }).catch(e => {
+                                        console.log(`❌ 球体视频播放失败: ${orbData.name}`, e);
+                                    });
+                                } else {
+                                    // 视频还没准备好或还没显示，继续等待
+                                    console.log(`⏳ 等待球体视频显示和加载完成: ${orbData.name}, opacity: ${orbVideo.style.opacity}, readyState: ${orbVideo.readyState}`);
+                                    
+                                    // 50ms后重新检查
+                                    setTimeout(startVideoPlayback, 50);
+                                }
+                            };
+                            
+                            startVideoPlayback();
+                        }, 150); // 等待白球消失动画完成后再检查
+                        
+                        console.log(`✨ 球体 ${orbData.name} 已完全显示，无缩放跳跃的流畅过渡完成`);
+                    }, 500); // 500ms开始白球→视频过渡
+                }, 50);
+            }
+            
+            // 🖱️ 处理球体点击事件 - 现在只处理继续下一个的逻辑
+            handleOrbClick(orbData, orbContainer, orbVideo) {
+                console.log(`🎯 用户点击继续下一个: ${orbData.name}`);
+                
+                // 防止重复点击
+                if (orbContainer.classList.contains('clicked')) {
+                    return;
+                }
+                orbContainer.classList.add('clicked');
+                
+                // 隐藏点击指引和文字
+                this.hideClickGuide();
+                this.hidePlaneText();
+                
+                // 停止视频播放
+                orbVideo.pause();
+                orbVideo.loop = false;
+                
+                // 清除当前球体引用
+                this.currentOrbContainer = null;
+                this.currentOrbVideo = null;
+                
+                // 开始消失动画
+                this.startOrbDisappear(orbContainer);
+                
+                // 增加完成计数和创建下一个球体
+                this.completedOrbs++;
+                this.currentOrbIndex++;
+                this.updateStatus(`已完成 ${this.completedOrbs}/4 个位面探索`);
+                
+                // 短暂延迟后创建下一个球体
+                setTimeout(() => {
+                    this.createNextOrb();
+                }, 500);
+            }
+                
+            startOrbDisappear(orbContainer) {
+                console.log('🌟 开始华丽消失动画（泡泡爆掉效果）');
+                
+                // 🎆 移除悬停效果，准备消失
+                orbContainer.classList.remove('hovering');
+                orbContainer.style.pointerEvents = 'none';
+                
+                // 🔥 加强glowLayer的消失特效，保持47% 47%偏移
+                const glowLayer = orbContainer.querySelector('.glow-layer');
+                if (glowLayer) {
+                    glowLayer.style.background = `
+                        radial-gradient(
+                            ellipse 32% 32% at 49.2% 48.7%,
+                            rgba(63, 252, 255, 0.8) 0%,
+                            rgba(63, 252, 255, 0.6) 30%,
+                            rgba(63, 252, 255, 0.4) 50%,
+                            rgba(63, 252, 255, 0.2) 70%,
+                            rgba(63, 252, 255, 0.1) 85%,
+                            transparent 100%
+                        )`;
+                }
+                // 移除容器边框，避免蓝色发光效果
+                orbContainer.style.border = 'none';
+                
+                // 🎆 创建更多爆炸粒子（24个）
+                for (let i = 0; i < 24; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'explosion-particle';
+                    
+                    // 随机方向和距离
+                    const angle = (i / 24) * 2 * Math.PI;
+                    const distance = 150 + Math.random() * 100;
+                    const dx = Math.cos(angle) * distance;
+                    const dy = Math.sin(angle) * distance;
+                    
+                    particle.style.cssText = `
+                        position: absolute;
+                        left: 50%;
+                        top: 50%;
+                        width: 8px;
+                        height: 8px;
+                        border-radius: 50%;
+                        background: radial-gradient(circle, rgba(63, 252, 255, 1) 0%, rgba(63, 252, 255, 0.8) 50%, transparent 100%);
+                        box-shadow: 0 0 15px 5px rgba(63, 252, 255, 0.8);
+                        transform: translate(-50%, -50%);
+                        pointer-events: none;
+                        z-index: 1000;
+                        --dx: ${dx}px;
+                        --dy: ${dy}px;
+                        animation: particleExplosion 1.5s ease-out forwards;
+                    `;
+                    
+                    orbContainer.appendChild(particle);
+                    
+                    // 1.5秒后移除粒子
+                setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 1500);
+                }
+                
+                // 🎆 主体泡泡爆掉动画 - 缩短时长确保快速消失
+                orbContainer.style.animation = 'bubblePop 0.8s ease-out forwards';
+                
+                // 🔧 立即开始透明度动画，确保视觉上快速消失
+                orbContainer.style.transition = 'opacity 0.3s ease-out';
+                setTimeout(() => {
+                    orbContainer.style.opacity = '0';
+                }, 200);
+                
+                // 🔧 监听动画结束事件，确保时机准确
+                const handleAnimationEnd = (e) => {
+                    // 确保是bubblePop动画结束，不是其他动画
+                    if (e.animationName === 'bubblePop') {
+                        if (orbContainer.parentNode) {
+                            orbContainer.parentNode.removeChild(orbContainer);
+                            console.log('✨ 球体已彻底消失（bubblePop动画结束）');
+                        }
+                        orbContainer.removeEventListener('animationend', handleAnimationEnd);
+                    }
+                };
+                
+                orbContainer.addEventListener('animationend', handleAnimationEnd);
+                
+                // 🛡️ 备用安全删除（缩短时间）
+                setTimeout(() => {
+                    if (orbContainer.parentNode) {
+                        orbContainer.parentNode.removeChild(orbContainer);
+                        console.log('✨ 球体安全删除（备用机制）');
+                    }
+                }, 1000);
+            }
+            
+            // 阶段4：确认穿越（20-25秒）
+            startPhase4() {
+                this.phase = 4;
+                this.updatePhase('阶段4：确认穿越');
+                this.updateStatus('确认穿越中...');
+                this.updateProgress(90);
+                
+                console.log('🚪 阶段4：确认穿越开始');
+                
+                // 清除球体阶段标记
+                this.inOrbPhase = false;
+                
+                // 隐藏所有球体
+                this.explorationOrbs.style.opacity = '0';
+                
+                // 使用平滑淡入方式播放确认穿越视频，避免黑屏
+                this.crossfadeMainVideo(this.videos.confirm, { muted: true, loop: false });
+                
+                // 🎵 阶段4：S03002背景音乐继续播放（不停止）
+                console.log('🎵 阶段4：S03002背景音乐继续播放');
+                
+                // 5秒后场景结束
+                setTimeout(() => {
+                    this.completeScene();
+                }, 5000);
+            }
+            
+            handleVideoEnded() {
+                if (this.phase === 4) {
+                    this.completeScene();
+                }
+            }
+            
+            completeScene() {
+                console.log('✅ 镜头3完成');
+                this.updatePhase('完成');
+                this.updateStatus('穿越完成！');
+                this.updateProgress(100);
+                
+                // 🎵 结束：停止S03002背景音乐
+                this.backgroundAudio.pause();
+                console.log('🎵 结束：S03002背景音乐已停止');
+                
+                // 若在父页面 iframe 中，直接跳转下一镜头；否则显示完成提示
+                if (window.parent && window.parent !== window) {
+                    // 直接通知父页面切换
+                    this.nextScene();
+                } else {
+                    // 独立运行时保留完成提示
+                    setTimeout(() => {
+                        this.showCompletionMessage();
+                    }, 1000);
+                }
+            }
+            
+            showCompletionMessage() {
+                const message = document.createElement('div');
+                message.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(0, 0, 0, 0.9);
+                    color: white;
+                    padding: 30px;
+                    border-radius: 15px;
+                    text-align: center;
+                    font-size: 18px;
+                    z-index: 10000;
+                    border: 2px solid #ffcc00;
+                `;
+                
+                const selectedOrbName = '多个位面'; // 因为用户可能探索了多个位面
+                
+                message.innerHTML = `
+                    <h3 style="color: #ffcc00; margin-bottom: 15px;">🎉 时空穿越完成！</h3>
+                    <p>选择的位面：<strong>${selectedOrbName}</strong></p>
+                    <p style="margin-top: 15px; font-size: 14px; opacity: 0.8;">即将进入下一镜头...</p>
+                `;
+                
+                document.body.appendChild(message);
+                
+                // 3秒后自动跳转
+                setTimeout(() => {
+                    this.nextScene();
+                }, 3000);
+            }
+            
+            // 快捷跳转功能
+            skipToExploration() {
+                this.continueClicked = true;
+                this.inOrbPhase = true; // 直接设置球体阶段标记
+                this.startPhase3();
+                    }
+            
+            skipToConfirm() {
+                this.startPhase4();
+            }
+            
+            restartScene() {
+                console.log('🔄 重新开始镜头3');
+                location.reload();
+            }
+            
+            nextScene() {
+                console.log('➡️ 前往下一镜头');
+                // 通知父页面镜头3完成
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'scene3-complete' }, '*');
+                } else {
+                    window.location.href = 'scene4-new-awakening.html';
+                }
+            }
+            
+            // 暂停所有媒体
+            pauseAll() {
+                if (this.mainVideo && !this.mainVideo.paused) {
+                    this.mainVideo.pause();
+                }
+                if (this.backgroundAudio && !this.backgroundAudio.paused) {
+                    this.backgroundAudio.pause();
+                }
+                if (this.phase1Audio && !this.phase1Audio.paused) {
+                    this.phase1Audio.pause();
+                }
+                if (this.currentOrbVideo && !this.currentOrbVideo.paused) {
+                    this.currentOrbVideo.pause();
+                }
+            }
+            
+            // 恢复播放所有媒体
+            resumeAll() {
+                if (this.mainVideo && this.mainVideo.paused && this.isStarted) {
+                    this.mainVideo.play().catch(e => console.log('恢复主视频播放失败:', e));
+                }
+                if (this.backgroundAudio && this.backgroundAudio.paused && this.isStarted) {
+                    this.backgroundAudio.play().catch(e => console.log('恢复背景音频播放失败:', e));
+                }
+                if (this.phase1Audio && this.phase1Audio.paused && this.isStarted) {
+                    this.phase1Audio.play().catch(e => console.log('恢复阶段1音频播放失败:', e));
+                }
+                if (this.currentOrbVideo && this.currentOrbVideo.paused && this.inOrbPhase) {
+                    this.currentOrbVideo.play().catch(e => console.log('恢复球体视频播放失败:', e));
+                }
+            }
+            
+            // 状态更新方法
+            updateStatus(status) {
+                this.sceneStatus.textContent = status;
+            }
+            
+            updatePhase(phase) {
+                this.currentPhase.textContent = phase;
+                this.phaseIndicator.textContent = phase;
+            }
+            
+            updateProgress(progress) {
+                this.sceneProgress.textContent = Math.round(progress) + '%';
+            }
+            
+            // 📝 显示位面识别文字（逐字显示）
+            showPlaneText(text) {
+                console.log(`📝 显示文字: ${text}`);
+                
+                const textContent = this.planeTextDisplay.querySelector('.text-content');
+                
+                // 清空之前的内容
+                textContent.innerHTML = '';
+                
+                // 显示文字容器
+                this.planeTextDisplay.classList.add('show');
+                
+                // 逐字显示效果
+                const chars = text.split('');
+                let charIndex = 0;
+                
+                const typeChar = () => {
+                    if (charIndex < chars.length) {
+                        const char = chars[charIndex];
+                        const charSpan = document.createElement('span');
+                        charSpan.textContent = char;
+                        charSpan.className = 'typing-char';
+                        charSpan.style.animationDelay = '0s';
+                        
+                        textContent.appendChild(charSpan);
+                        
+                        charIndex++;
+                        
+                        // 每100ms显示一个字符
+                        setTimeout(typeChar, 100);
+                    } else {
+                        // 所有字符显示完成后，不自动隐藏，等待球体被点击时再隐藏
+                        console.log('📝 对话泡泡显示完成，等待球体被点击时隐藏');
+                    }
+                };
+                
+                // 开始逐字显示
+                typeChar();
+            }
+            
+            // 隐藏位面识别文字
+            hidePlaneText() {
+                this.planeTextDisplay.classList.remove('show');
+                
+                // 延迟清空内容，等待淡出动画完成
+                setTimeout(() => {
+                    const textContent = this.planeTextDisplay.querySelector('.text-content');
+                    textContent.innerHTML = '';
+                }, 500);
+            }
+            
+            // 显示点击指引
+            showClickGuide() {
+                console.log('👆 显示点击指引');
+                this.clickGuide.classList.add('show');
+                this.screenClickOverlay.classList.add('active');
+            }
+            
+            // 隐藏点击指引
+            hideClickGuide() {
+                console.log('👆 隐藏点击指引');
+                this.clickGuide.classList.remove('show');
+                this.screenClickOverlay.classList.remove('active');
+            }
+            
+            // ✨ 平滑切换主视频，避免黑屏
+            crossfadeMainVideo(newSrc, {
+                muted = true,
+                loop = false,
+                autoplay = true
+            } = {}) {
+                return new Promise((resolve) => {
+                    // 如果目标就是当前源，则直接返回
+                    if (this.mainVideo.src.includes(newSrc)) {
+                        resolve(this.mainVideo);
+                        return;
+                    }
+
+                    // 创建新的 video 元素，覆盖在旧视频之上
+                    const nextVideo = document.createElement('video');
+                    nextVideo.className = 'video-player';
+                    nextVideo.preload = 'auto';
+                    nextVideo.muted = muted;
+                    nextVideo.loop = loop;
+                    nextVideo.playsInline = true;
+                    nextVideo.style.opacity = '0';
+                    nextVideo.style.transition = 'opacity 0.4s ease';
+
+                    // 插入到容器中（旧视频之上）
+                    this.container.appendChild(nextVideo);
+
+                    const doPlay = () => {
+                        // 播放新视频
+                        if (autoplay) {
+                            nextVideo.play().catch(e => console.warn('新视频自动播放被阻止:', e));
+                        }
+
+                        // 淡入新视频
+                        requestAnimationFrame(() => {
+                            nextVideo.style.opacity = '1';
+                            // 同步淡出旧视频
+                            this.mainVideo.style.transition = 'opacity 0.4s ease';
+                            this.mainVideo.style.opacity = '0';
+
+                            // 400ms 后移除旧视频，替换引用
+                            setTimeout(() => {
+                                try {
+                                    this.mainVideo.pause();
+                                } catch(e) {}
+                                if (this.mainVideo.parentNode) {
+                                    this.mainVideo.parentNode.removeChild(this.mainVideo);
+                                }
+                                this.mainVideo = nextVideo;
+                                resolve(nextVideo);
+                            }, 400);
+                        });
+                    };
+
+                    // 使用预加载系统减少加载时间
+                    if (window.videoPreloader) {
+                        // 若已预加载，直接切换
+                        const preloaded = window.videoPreloader.getPreloadedVideo(newSrc);
+                        if (preloaded) {
+                            nextVideo.src = newSrc;
+                            // loadeddata 仍需等待解码
+                        } else {
+                            window.videoPreloader.preloadVideo(newSrc).finally(() => {
+                                nextVideo.src = newSrc;
+                            });
+                        }
+                    } else {
+                        nextVideo.src = newSrc;
+                    }
+
+                    // 等待可播放再开始淡入
+                    nextVideo.addEventListener('loadeddata', () => {
+                        doPlay();
+                    });
+                });
+            }
+        }
+        
+        // 全局函数供控制面板使用
+        let scene3Instance;
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            scene3Instance = new Scene3TimeVortex();
+            
+            // 监听来自父页面的消息
+            window.addEventListener('message', (event) => {
+                if (event.data.type === 'scene3-start') {
+                    console.log('📢 收到来自父页面的启动信号');
+                    scene3Instance.startScene();
+                } else if (event.data.type === 'pause') {
+                    console.log('⏸️ 收到暂停信号');
+                    // 暂停所有音频和视频
+                    scene3Instance.pauseAll();
+                } else if (event.data.type === 'resume') {
+                    console.log('▶️ 收到恢复信号');
+                    // 恢复播放
+                    scene3Instance.resumeAll();
+                } else if (event.data.type === 'stop-all-audio') {
+                    console.log('🔇 镜头3收到停止音频指令');
+                    // 停止所有音频
+                    scene3Instance.pauseAll();
+                    console.log('🔇 镜头3所有音频已停止');
+                } else if (event.data.type === 'skip-to-orbs') {
+                    console.log('⏭️ 收到跳转到球体阶段指令');
+                    scene3Instance.skipToExploration();
+                }
+            });
+        });
+        
+        function startScene() {
+            scene3Instance.startScene();
+        }
+        
+        function skipToExploration() {
+            scene3Instance.skipToExploration();
+        }
+        
+        function skipToConfirm() {
+            scene3Instance.skipToConfirm();
+        }
+        
+        function restartScene() {
+            scene3Instance.restartScene();
+        }
+        
+        function nextScene() {
+            scene3Instance.nextScene();
+        }
+        
+        // 快捷键支持
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case ' ':
+                    e.preventDefault();
+                    if (scene3Instance.phase === 2) {
+                        scene3Instance.handleContinueClick();
+                    }
+                    break;
+                case 'Enter':
+                    e.preventDefault();
+                    startScene();
+                    break;
+                case 'r':
+                case 'R':
+                    restartScene();
+                    break;
+                case 'n':
+                case 'N':
+                    nextScene();
+                    break;
+                case '3':
+                    skipToExploration();
+                    break;
+                case '4':
+                    skipToConfirm();
+                    break;
+            }
+        });
+        
+        console.log('🎮 镜头3控制：空格键=继续, 回车=开始, R=重启, N=下一镜头, 3=跳转探索, 4=跳转确认');
+    </script>
+    
+    <!-- 引入视频预加载系统 -->
+    <script src="video-preloader.js"></script>
+</body>
+</html> 

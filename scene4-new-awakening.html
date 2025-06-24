@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镜头4：觉醒旅程 - 代号qin</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        body {
+            background: #000;
+            overflow: hidden;
+            font-family: 'Microsoft YaHei', sans-serif;
+            user-select: none;
+        }
+        
+        #scene4-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* 主视频播放器 */
+        #main-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+        
+        /* 背景音乐（隐藏） */
+        #background-audio {
+            display: none;
+        }
+        
+        /* 用户交互按钮样式 - 镜头1风格 */
+        .action-button {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 70%, transparent 100%);
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            z-index: 999999;
+            opacity: 0;
+            animation: rippleButton 2s infinite;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            text-align: center;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        /* "触摸玉佩"按钮特殊定位 - 放置在玉佩上 */
+        .action-button.jade-position {
+            top: 70%;
+            left: 45%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .action-button::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            animation: rippleWave 2s infinite;
+            z-index: -1;
+        }
+        
+        .action-button::after {
+            content: '';
+            position: absolute;
+            width: 120%;
+            height: 120%;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: rippleWave 2s infinite 0.5s;
+            z-index: -2;
+        }
+        
+        .action-button:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 70%, transparent 100%);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .action-button.show {
+            opacity: 0.8;
+            animation: rippleButton 2s infinite;
+        }
+        
+        /* 圆形按钮波动动画 */
+        @keyframes rippleButton {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1); 
+                opacity: 0.8; 
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.05); 
+                opacity: 1; 
+            }
+        }
+        
+        /* 波纹扩散动画 */
+        @keyframes rippleWave {
+            0% { 
+                transform: scale(1); 
+                opacity: 0.6; 
+            }
+            50% { 
+                transform: scale(1.3); 
+                opacity: 0.3; 
+            }
+            100% { 
+                transform: scale(1.6); 
+                opacity: 0; 
+            }
+        }
+        
+        /* 字幕样式 - 圆角对话泡泡无描边 */
+        .subtitle {
+            position: fixed !important;
+            bottom: 200px !important;
+            left: 50% !important;
+            color: white !important;
+            font-size: 22px !important;
+            font-weight: bold !important;
+            text-align: center !important;
+            z-index: 9999999 !important;
+            max-width: 600px !important;
+            opacity: 0 !important;
+            transform: translateX(-50%) translateY(20px) !important;
+            transition: all 0.5s ease !important;
+            font-family: 'Microsoft YaHei', sans-serif !important;
+            /* 圆角对话泡泡样式 */
+            background: rgba(0, 0, 0, 0.7) !important;
+            border: none !important;
+            border-radius: 25px !important;
+            padding: 15px 25px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8) !important;
+            display: none !important;
+        }
+        
+        .subtitle.show {
+            opacity: 1 !important;
+            transform: translateX(-50%) translateY(0) !important;
+            display: block !important;
+        }
+        
+        .subtitle::before {
+            content: '';
+            margin-right: 0px;
+            font-size: 22px;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+        }
+        
+        /* 对话泡泡底部小尖角 */
+        .subtitle::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 12px solid rgba(0, 0, 0, 0.7);
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+        
+        /* 使用EffectSystem中的转场效果，这里只保留降级备用样式 */
+        
+        /* 视频震撼效果 */
+        .video-shock {
+            animation: videoShake 0.8s ease-out;
+        }
+        
+        /* 按钮震动效果 */
+        .button-shock {
+            animation: buttonShake 0.4s ease-out;
+            border-color: rgba(255, 255, 100, 0.9) !important;
+            box-shadow: 
+                0 0 20px rgba(255, 255, 100, 0.6),
+                0 0 40px rgba(255, 255, 100, 0.3),
+                inset 0 0 10px rgba(255, 255, 100, 0.2) !important;
+        }
+        
+        @keyframes videoShake {
+            0%, 100% { transform: translateX(0); }
+            10% { transform: translateX(-2px) scale(1.01); }
+            20% { transform: translateX(2px) scale(0.99); }
+            30% { transform: translateX(-3px) scale(1.02); }
+            40% { transform: translateX(3px) scale(0.98); }
+            50% { transform: translateX(-2px) scale(1.01); }
+            60% { transform: translateX(2px) scale(0.99); }
+            70% { transform: translateX(-1px) scale(1.005); }
+            80% { transform: translateX(1px) scale(0.995); }
+            90% { transform: translateX(-0.5px) scale(1.002); }
+        }
+        
+        /* 按钮震动动画 - 增强震动效果 */
+        @keyframes buttonShake {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1);
+                filter: brightness(1);
+            }
+            10% { 
+                transform: translate(-50%, -50%) translate(-3px, -2px) scale(1.05);
+                filter: brightness(1.2);
+            }
+            20% { 
+                transform: translate(-50%, -50%) translate(2px, -3px) scale(0.95);
+                filter: brightness(1.1);
+            }
+            30% { 
+                transform: translate(-50%, -50%) translate(-2px, 3px) scale(1.08);
+                filter: brightness(1.3);
+            }
+            40% { 
+                transform: translate(-50%, -50%) translate(3px, 2px) scale(0.92);
+                filter: brightness(1.15);
+            }
+            50% { 
+                transform: translate(-50%, -50%) translate(-1px, -2px) scale(1.03);
+                filter: brightness(1.25);
+            }
+            60% { 
+                transform: translate(-50%, -50%) translate(2px, 1px) scale(0.97);
+                filter: brightness(1.1);
+            }
+            70% { 
+                transform: translate(-50%, -50%) translate(-1px, 1px) scale(1.02);
+                filter: brightness(1.05);
+            }
+            80% { 
+                transform: translate(-50%, -50%) translate(1px, -1px) scale(0.98);
+                filter: brightness(1.02);
+            }
+            90% { 
+                transform: translate(-50%, -50%) translate(-0.5px, 0.5px) scale(1.01);
+                filter: brightness(1.01);
+            }
+        }
+        
+        /* 点击波纹效果 - 增强版 */
+        @keyframes clickRipple {
+            0% {
+                width: 20px;
+                height: 20px;
+                opacity: 0.9;
+                background: rgba(255, 255, 255, 0.8);
+                box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+            }
+            25% {
+                width: 40px;
+                height: 40px;
+                opacity: 0.7;
+                background: rgba(255, 255, 100, 0.6);
+                box-shadow: 0 0 15px rgba(255, 255, 100, 0.5);
+            }
+            50% {
+                width: 80px;
+                height: 80px;
+                opacity: 0.5;
+                background: rgba(255, 255, 100, 0.4);
+                box-shadow: 0 0 25px rgba(255, 255, 100, 0.4);
+            }
+            75% {
+                width: 120px;
+                height: 120px;
+                opacity: 0.2;
+                background: rgba(255, 215, 0, 0.3);
+                box-shadow: 0 0 35px rgba(255, 215, 0, 0.3);
+            }
+            100% {
+                width: 160px;
+                height: 160px;
+                opacity: 0;
+                background: rgba(255, 215, 0, 0.1);
+                box-shadow: 0 0 50px rgba(255, 215, 0, 0.1);
+            }
+        }
+        
+        /* 武德进度条发光动画 - 增强版 */
+        @keyframes martialGlow {
+            0% {
+                box-shadow: 
+                    0 0 10px rgba(255, 255, 255, 0.8),
+                    0 0 20px rgba(255, 255, 255, 0.4),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                    inset 0 -1px 0 rgba(255, 255, 255, 0.6);
+                filter: brightness(1.2);
+            }
+            50% {
+                box-shadow: 
+                    0 0 20px rgba(255, 255, 255, 1),
+                    0 0 35px rgba(255, 255, 255, 0.7),
+                    0 0 50px rgba(255, 255, 255, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 1),
+                    inset 0 -1px 0 rgba(255, 255, 255, 0.8);
+                filter: brightness(1.5);
+            }
+            100% {
+                box-shadow: 
+                    0 0 15px rgba(255, 255, 255, 0.9),
+                    0 0 30px rgba(255, 255, 255, 0.5),
+                    0 0 45px rgba(255, 255, 255, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+                    inset 0 -1px 0 rgba(255, 255, 255, 0.7);
+                filter: brightness(1.3);
+            }
+        }
+        
+        /* ===== 镜头4自然震撼转场效果 ===== */
+        /* 去掉色彩变化，与阶段3自然过渡，柔和但有冲击力 */
+        @keyframes awakening-shock {
+            /* 蓄力阶段：轻微暗化营造压迫感 */
+            0% { 
+                transform: scale(0.95) rotate(0deg);
+                filter: brightness(0.6) contrast(1.2) blur(2px);
+            }
+            5% { 
+                transform: scale(0.92) rotate(-1deg);
+                filter: brightness(0.4) contrast(1.4) blur(3px);
+            }
+            /* 爆发阶段：瞬间亮化震撼 */
+            15% { 
+                transform: scale(1.8) rotate(-3deg);
+                filter: brightness(3.0) contrast(2.5) blur(0px);
+            }
+            /* 强冲击阶段，逐渐恢复 */
+            30% { 
+                transform: scale(1.4) rotate(2deg);
+                filter: brightness(2.2) contrast(2.0) blur(0px);
+            }
+            45% { 
+                transform: scale(1.2) rotate(-1deg);
+                filter: brightness(1.8) contrast(1.6) blur(0px);
+            }
+            /* 稳定过渡回到正常 */
+            65% { 
+                transform: scale(1.1) rotate(0.5deg);
+                filter: brightness(1.4) contrast(1.3) blur(0px);
+            }
+            85% { 
+                transform: scale(1.05) rotate(0deg);
+                filter: brightness(1.1) contrast(1.1) blur(0px);
+            }
+            /* 完全恢复正常 */
+            100% { 
+                transform: scale(1) rotate(0deg);
+                filter: brightness(1) contrast(1) blur(0px);
+            }
+        }
+
+        @keyframes body-shake-awakening {
+            /* 轻微蓄力阶段 */
+            0% { transform: translateX(0) translateY(0); }
+            5% { transform: translateX(-1px) translateY(-1px); }
+            10% { transform: translateX(1px) translateY(1px); }
+            /* 爆发阶段 - 适中震动 */
+            15% { transform: translateX(-4px) translateY(-3px); }
+            18% { transform: translateX(4px) translateY(3px); }
+            21% { transform: translateX(-3px) translateY(2px); }
+            24% { transform: translateX(3px) translateY(-2px); }
+            27% { transform: translateX(-2px) translateY(-1px); }
+            30% { transform: translateX(2px) translateY(1px); }
+            /* 逐渐平息阶段 */
+            35% { transform: translateX(-2px) translateY(-1px); }
+            40% { transform: translateX(2px) translateY(1px); }
+            45% { transform: translateX(-1px) translateY(0px); }
+            50% { transform: translateX(1px) translateY(-1px); }
+            60% { transform: translateX(-1px) translateY(1px); }
+            70% { transform: translateX(0px) translateY(-1px); }
+            80% { transform: translateX(0px) translateY(1px); }
+            90% { transform: translateX(0px) translateY(0px); }
+            100% { transform: translateX(0) translateY(0); }
+        }
+
+        /* 觉醒震撼效果类 - 加快速度 */
+        .awakening-shock-effect {
+            animation: awakening-shock 0.5s ease-out;
+        }
+
+        .body-shake-awakening {
+            animation: body-shake-awakening 0.5s ease-out;
+        }
+        
+        /* 觉醒冲击波效果 - 柔和扩散 */
+        @keyframes awakening-shockwave {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(8);
+                opacity: 0.6;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(15);
+                opacity: 0;
+            }
+        }
+        
+        /* 五维属性界面 - 移至右侧，优化尺寸，隐藏滚动条 */
+        .attributes-panel {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            width: 420px;
+            max-height: 600px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 20, 40, 0.95) 100%);
+            border: 2px solid #FFD700;
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            z-index: 200;
+            opacity: 0;
+            transform: translateY(-50%) translateX(400px);
+            backdrop-filter: blur(15px);
+            box-shadow: 
+                0 0 30px rgba(255, 215, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+        
+        /* 隐藏 WebKit 浏览器的滚动条 */
+        .attributes-panel::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .attributes-panel.show {
+            animation: panelSlideIn 1s ease-out forwards;
+        }
+        
+        @keyframes panelSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-50%) translateX(400px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(-50%) translateX(0);
+            }
+        }
+        
+        .panel-title {
+            text-align: center;
+            font-size: 18px;
+            color: #FFD700;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+            padding-bottom: 8px;
+        }
+        
+        .attribute-item {
+            margin: 12px 0;
+            opacity: 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .attribute-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+        
+        .attribute-item.animate {
+            animation: attributeGrow 2s ease-out forwards;
+        }
+        
+        .attribute-item:nth-child(2) { animation-delay: 0.2s; }
+        .attribute-item:nth-child(3) { animation-delay: 0.4s; }
+        .attribute-item:nth-child(4) { animation-delay: 0.6s; }
+        .attribute-item:nth-child(5) { animation-delay: 0.8s; }
+        .attribute-item:nth-child(6) { animation-delay: 1.0s; }
+        
+        @keyframes attributeGrow {
+            0% {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            50% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .attribute-name {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #90EE90;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .attribute-icon {
+            font-size: 18px;
+        }
+        
+        .attribute-bar {
+            width: 100%;
+            height: 18px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 9px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin: 4px 0;
+        }
+        
+        .attribute-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #32CD32 0%, #90EE90 100%);
+            border-radius: 9px;
+            width: 0%;
+            transition: width 3s ease-out;
+            position: relative;
+        }
+        
+        /* 武德进度条特殊样式 - 白色发光增强版 */
+        .attribute-fill.martial {
+            background: linear-gradient(90deg, 
+                #ffffff 0%, 
+                #f8f8f8 25%, 
+                #ffffff 50%, 
+                #f5f5f5 75%, 
+                #ffffff 100%);
+            box-shadow: 
+                0 0 10px rgba(255, 255, 255, 0.8),
+                0 0 20px rgba(255, 255, 255, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.6);
+            animation: martialGlow 2.5s ease-in-out infinite alternate;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            position: relative;
+            overflow: visible;
+        }
+        
+        /* 武德进度条额外光晕效果 */
+        .attribute-fill.martial::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(90deg, 
+                rgba(255, 255, 255, 0.3) 0%, 
+                rgba(255, 255, 255, 0.1) 50%, 
+                rgba(255, 255, 255, 0.3) 100%);
+            border-radius: 11px;
+            z-index: -1;
+            animation: martialAura 3s ease-in-out infinite;
+        }
+        
+        @keyframes martialAura {
+            0%, 100% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.02);
+            }
+        }
+        
+        .attribute-value {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        
+        .attribute-description {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 5px;
+            margin-left: 30px;
+        }
+        
+        /* 当前阶段显示 */
+        .phase-indicator {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #FFD700;
+            padding: 8px 16px;
+            border-radius: 15px;
+            font-size: 14px;
+            z-index: 100;
+            border: 1px solid #FFD700;
+            display: none !important; /* 隐藏提示 */
+        }
+        
+        /* 隐藏元素 */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* 控制面板 */
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            z-index: 10000;
+            min-width: 200px;
+            border: 1px solid #333;
+        }
+        
+        .control-button {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #666;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: background 0.3s;
+        }
+        
+        .control-button:hover {
+            background: #555;
+        }
+        
+        .status {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #666;
+            font-size: 10px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div id="scene4-container">
+        <!-- 主视频播放器 -->
+        <video id="main-video" preload="auto"></video>
+        
+        <!-- 背景音乐 -->
+        <audio id="background-audio" loop preload="auto">
+            <source src="镜头4/1/S04001.MP3" type="audio/mpeg">
+        </audio>
+        
+        <!-- 当前阶段指示器 -->
+        <div class="phase-indicator" id="phase-indicator">阶段1：准备觉醒</div>
+        
+        <!-- 用户交互按钮 -->
+        <button class="action-button hidden" id="action-button"></button>
+        
+        <!-- 字幕区域 -->
+        <div id="subtitle" class="subtitle hidden"></div>
+        
+        <!-- 使用EffectSystem提供转场效果，不需要额外元素 -->
+        
+        <!-- 五维属性界面 -->
+        <div class="attributes-panel hidden" id="attributes-panel">
+            <div class="panel-title">✨ 五维属性觉醒 ✨</div>
+            
+            <div class="attribute-item">
+                <div class="attribute-name">
+                    <span class="attribute-icon">📚</span>
+                    <span>学识 (智慧)</span>
+                </div>
+                <div class="attribute-bar">
+                    <div class="attribute-fill" id="knowledge-fill"></div>
+                    <div class="attribute-value" id="knowledge-value">15/100</div>
+                </div>
+                <div class="attribute-description">决定学习能力和知识储备</div>
+            </div>
+            
+            <div class="attribute-item">
+                <div class="attribute-name">
+                    <span class="attribute-icon">⚔️</span>
+                    <span>武德 (力量)</span>
+                </div>
+                <div class="attribute-bar">
+                    <div class="attribute-fill martial" id="martial-fill"></div>
+                    <div class="attribute-value" id="martial-value">20/100</div>
+                </div>
+                <div class="attribute-description">影响战斗力和体能表现</div>
+            </div>
+            
+            <div class="attribute-item">
+                <div class="attribute-name">
+                    <span class="attribute-icon">⚙️</span>
+                    <span>巧思 (智谋)</span>
+                </div>
+                <div class="attribute-bar">
+                    <div class="attribute-fill" id="cunning-fill"></div>
+                    <div class="attribute-value" id="cunning-value">12/100</div>
+                </div>
+                <div class="attribute-description">决定策略思维和创新能力</div>
+            </div>
+            
+            <div class="attribute-item">
+                <div class="attribute-name">
+                    <span class="attribute-icon">🎭</span>
+                    <span>文采 (魅力)</span>
+                </div>
+                <div class="attribute-bar">
+                    <div class="attribute-fill" id="charisma-fill"></div>
+                    <div class="attribute-value" id="charisma-value">18/100</div>
+                </div>
+                <div class="attribute-description">决定外交能力和人际关系</div>
+            </div>
+            
+            <div class="attribute-item">
+                <div class="attribute-name">
+                    <span class="attribute-icon">🌟</span>
+                    <span>仁德 (道德)</span>
+                </div>
+                <div class="attribute-bar">
+                    <div class="attribute-fill" id="virtue-fill"></div>
+                    <div class="attribute-value" id="virtue-value">10/100</div>
+                </div>
+                <div class="attribute-description">影响道德选择和民心归附</div>
+            </div>
+        </div>
+        
+        <!-- 控制面板 -->
+        <div class="controls" id="debug-controls">
+            <h4 style="margin: 0 0 10px 0; color: #90EE90;">镜头4：觉醒旅程</h4>
+            <button class="control-button" onclick="scene4.skipToPhase(2)">跳转到阶段2</button>
+            <button class="control-button" onclick="scene4.skipToPhase(3)">跳转到阶段3</button>
+            <button class="control-button" onclick="scene4.skipToPhase(4)">跳转到阶段4</button>
+                            <button class="control-button" onclick="testAwakeningShock()" style="background: #9b59b6;">💥 测试震撼转场</button>
+                <button class="control-button" onclick="scene4.testSubtitle()" style="background: #3498db;">💭 测试字幕</button>
+            <button class="control-button" onclick="scene4.restartScene()">重新开始</button>
+            <button class="control-button" onclick="scene4.nextScene()">下一镜头</button>
+            
+            <div class="status">
+                <div>当前阶段: <span id="current-phase">1</span></div>
+                <div>状态: <span id="scene-status">准备中</span></div>
+                <div>视频: <span id="video-status">未开始</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/keyboardToggle.js"></script>
+
+    <script>
+        class Scene4AwakeningJourney {
+            constructor() {
+                this.container = document.getElementById('scene4-container');
+                this.mainVideo = document.getElementById('main-video');
+                this.backgroundAudio = document.getElementById('background-audio');
+                this.phaseIndicator = document.getElementById('phase-indicator');
+                this.actionButton = document.getElementById('action-button');
+                this.subtitleElement = document.getElementById('subtitle');
+                this.attributesPanel = document.getElementById('attributes-panel');
+                
+                // 状态显示元素
+                this.currentPhaseSpan = document.getElementById('current-phase');
+                this.sceneStatus = document.getElementById('scene-status');
+                this.videoStatus = document.getElementById('video-status');
+                
+                // 当前阶段
+                this.currentPhase = 1;
+                
+                // 视频路径配置
+                this.videos = {
+                    phase1: '镜头4/1/C04001-1.mp4',    // 第一阶段视频（原声）
+                    phase2: '镜头4/2/c04002-1.mp4',    // 第二阶段视频
+                    phase3: '镜头4/3/C04003-1.mp4',    // 第三阶段视频
+                    phase4: '镜头4/4/c04004-1.mp4'     // 第四阶段视频
+                };
+                
+                // 五维属性数据 - 只有武德增长
+                this.attributes = {
+                    knowledge: { current: 15, target: 15, element: 'knowledge' }, // 不变
+                    martial: { current: 20, target: 45, element: 'martial' },     // 增长
+                    cunning: { current: 12, target: 12, element: 'cunning' },     // 不变
+                    charisma: { current: 18, target: 18, element: 'charisma' },   // 不变
+                    virtue: { current: 10, target: 10, element: 'virtue' }        // 不变
+                };
+                
+                this.init();
+            }
+            
+            async init() {
+                console.log('🎬 镜头4：觉醒旅程 - 初始化开始');
+                
+                try {
+                    // 检查是否在iframe中运行，如果是则隐藏控制面板
+                    if (window.parent !== window) {
+                        const debugControls = document.getElementById('debug-controls');
+                        if (debugControls) {
+                            debugControls.style.display = 'none';
+                            console.log('🖥️ 在iframe中运行，已隐藏调试控制面板');
+                        }
+                    }
+                    
+                    // 开始播放背景音乐（全程循环）
+                    await this.playBackgroundMusic();
+                    
+                    // 启动第一阶段
+                    await this.startPhase1();
+                    
+                } catch (error) {
+                    console.error('❌ 初始化失败:', error);
+                    this.updateStatus('初始化失败');
+                }
+            }
+            
+            async playBackgroundMusic() {
+                console.log('🎵 开始播放背景音乐 S04001.MP3');
+                try {
+                    this.backgroundAudio.volume = 0.3; // 降低音量，让视频原声更清晰
+                    await this.backgroundAudio.play();
+                    console.log('✅ 背景音乐播放成功');
+                } catch (error) {
+                    console.warn('⚠️ 背景音乐播放失败（可能需要用户交互）:', error);
+                }
+            }
+            
+            async startPhase1() {
+                console.log('🎬 开始阶段1：播放C04001-1.mp4（原声）');
+                this.currentPhase = 1;
+                this.updatePhaseDisplay('阶段1：觉醒开始');
+                this.updateStatus('播放第一阶段视频');
+                
+                // 设置视频源
+                this.mainVideo.src = this.videos.phase1;
+                this.mainVideo.muted = false; // 保留原声，不受背景音乐影响
+                this.mainVideo.loop = false;
+                this.mainVideo.volume = 1.0; // 确保原声音量
+                
+                // 监听视频结束事件
+                this.mainVideo.onended = () => {
+                    console.log('✅ 阶段1视频播放完成');
+                    this.showActionButton('起身', () => this.startPhase2());
+                };
+                
+                // 监听视频错误
+                this.mainVideo.onerror = (e) => {
+                    console.error('❌ 阶段1视频加载失败:', e);
+                    this.updateStatus('视频加载失败');
+                };
+                
+                try {
+                    await this.mainVideo.play();
+                    this.updateVideoStatus('阶段1播放中');
+                    console.log('✅ 阶段1视频开始播放');
+                } catch (error) {
+                    console.warn('⚠️ 阶段1视频自动播放失败，尝试静音后重试');
+                    this.mainVideo.muted = true;
+                    try {
+                        await this.mainVideo.play();
+                        this.updateVideoStatus('阶段1播放中 (静音)');
+                        this.updateStatus('已自动静音播放');
+                        // 可选择显示提示条告知用户点按恢复声音
+                    } catch (err2) {
+                        console.error('❌ 静音重试仍失败:', err2);
+                        this.updateStatus('点击屏幕以开始播放');
+                        // 显示覆盖层提示用户点击
+                        this.showManualPlayCover();
+                    }
+                }
+            }
+            
+            async startPhase2() {
+                console.log('🎬 开始阶段2：播放c04002-1.mp4');
+                this.currentPhase = 2;
+                this.updatePhaseDisplay('阶段2：起身探索');
+                this.updateStatus('播放第二阶段视频');
+                this.hideActionButton();
+                
+                // 平滑切换视频，避免黑屏
+                await this.crossfadeMainVideo(this.videos.phase2, { muted:false, loop:false });
+                this.mainVideo.volume = 1.0;
+                
+                // 监听时间更新，在最后一帧暂停
+                this.mainVideo.ontimeupdate = () => {
+                    // 当视频接近结束时暂停并显示按钮
+                    if (this.mainVideo.duration > 0 && 
+                        this.mainVideo.currentTime >= this.mainVideo.duration - 0.1) {
+                        this.mainVideo.pause();
+                        this.mainVideo.ontimeupdate = null; // 移除监听
+                        console.log('✅ 阶段2视频暂停在最后一帧');
+                        
+                        // 直接显示按钮，震撼效果在点击时触发
+                        this.showJadeButton('触摸玉佩', () => {
+                            this.addButtonShockEffect(); // 按钮震动效果
+                            setTimeout(() => {
+                                this.addShockTransition(() => {
+                                    this.startPhase3();
+                                });
+                            }, 200); // 延迟一点让按钮震动效果先显示
+                        });
+                    }
+                };
+                
+                // 监听视频结束事件（备用）
+                this.mainVideo.onended = () => {
+                    console.log('✅ 阶段2视频播放完成');
+                    this.showActionButton('触摸玉佩', () => this.startPhase3());
+                };
+                
+                try {
+                    await this.mainVideo.play();
+                    this.updateVideoStatus('阶段2播放中');
+                    console.log('✅ 阶段2视频开始播放');
+                } catch (error) {
+                    console.error('❌ 阶段2视频播放失败:', error);
+                    this.updateStatus('视频播放失败');
+                }
+            }
+            
+            async startPhase3() {
+                console.log('🎬 开始播放阶段3：C04003-1.mp4');
+                this.updatePhaseDisplay('阶段3：触摸玉佩');
+                this.updateStatus('播放第三阶段视频');
+                this.hideActionButton();
+                
+                // 平滑切换视频
+                await this.crossfadeMainVideo(this.videos.phase3, { muted:false, loop:false });
+                this.mainVideo.volume = 1.0;
+                
+                // 提前预加载阶段4视频，减少黑屏
+                if (window.videoPreloader) {
+                    window.videoPreloader.preloadVideo(this.videos.phase4);
+                }
+                
+                this.phase3Ending = false;
+                this.mainVideo.ontimeupdate = () => {
+                    console.log(`🧪 [DEBUG] 阶段3播放时间: ${this.mainVideo.currentTime.toFixed(1)}s, 字幕已显示: ${this.subtitleShown}`);
+                    
+                    if (this.mainVideo.currentTime >= 8.0 && !this.subtitleShown) {
+                        this.subtitleShown = true;
+                        console.log('🎯 到达8秒，开始显示字幕和属性界面');
+                        this.showSubtitle('这玉佩....能吸收星光？');
+                        this.showAttributesPanel();
+                        console.log('✅ 8秒时显示字幕和属性界面');
+                    }
+                    
+                    // 备用触发点：如果视频播放了一半还没显示字幕，强制显示
+                    if (this.mainVideo.duration > 0 && 
+                        this.mainVideo.currentTime >= this.mainVideo.duration * 0.5 && 
+                        !this.subtitleShown) {
+                        console.log('⚠️ 备用触发：视频播放一半时强制显示字幕');
+                        this.subtitleShown = true;
+                        this.showSubtitle('这玉佩....能吸收星光？');
+                        this.showAttributesPanel();
+                    }
+                };
+                
+                // 监听视频结束事件
+                this.mainVideo.onended = () => {
+                    console.log('✅ 阶段3视频播放完成');
+                    this.mainVideo.ontimeupdate = null; // 移除监听
+                    this.hideSubtitle();
+                    // 暂停在最后一帧（已自动暂停）
+                    // 显示点击继续提示
+                    this.showContinuePrompt();
+                };
+                
+                try {
+                    this.subtitleShown = false; // 重置字幕标记
+                    await this.mainVideo.play();
+                    this.updateVideoStatus('阶段3播放中');
+                    console.log('✅ 阶段3视频开始播放');
+                    
+                    // 保险机制：10秒后如果字幕还没显示就强制显示
+                    setTimeout(() => {
+                        if (!this.subtitleShown) {
+                            console.log('🚨 保险机制触发：10秒后强制显示字幕');
+                            this.subtitleShown = true;
+                            this.showSubtitle('这玉佩....能吸收星光？');
+                            this.showAttributesPanel();
+                        }
+                    }, 10000);
+                    
+                } catch (error) {
+                    console.error('❌ 阶段3视频播放失败:', error);
+                    this.updateStatus('视频播放失败');
+                    // 如果播放失败，直接进入阶段4
+                    console.log('⚠️ 跳过阶段3，直接进入阶段4');
+                    this.startPhase4();
+                }
+            }
+            
+            async startPhase4() {
+                console.log('🎬 阶段4视频已取消，直接进入下一镜头');
+                this.currentPhase = 4;
+                this.updatePhaseDisplay('阶段4：结束');
+                this.updateStatus('即将进入下一镜头');
+
+                // 停止当前视频
+                try { this.mainVideo.pause(); } catch(e) {}
+
+                // 直接跳转下一镜头
+                setTimeout(() => {
+                    this.nextScene();
+                }, 500);
+            }
+            
+            async showAttributesPanel() {
+                console.log('📊 显示五维属性界面');
+                
+                // 显示属性面板
+                this.attributesPanel.classList.remove('hidden');
+                this.attributesPanel.classList.add('show');
+                
+                // 延迟1秒后开始属性增长动画
+                setTimeout(() => {
+                    this.startAttributeAnimation();
+                }, 1000);
+            }
+            
+            startAttributeAnimation() {
+                console.log('✨ 开始属性增长动画');
+                
+                // 为每个属性项添加动画类
+                const attributeItems = this.attributesPanel.querySelectorAll('.attribute-item');
+                attributeItems.forEach((item, index) => {
+                    setTimeout(() => {
+                        item.classList.add('animate');
+                    }, index * 200);
+                });
+                
+                // 开始数值增长动画
+                setTimeout(() => {
+                    this.animateAttributeValues();
+                }, 500);
+            }
+            
+            animateAttributeValues() {
+                console.log('📈 开始属性数值增长');
+                
+                Object.entries(this.attributes).forEach(([key, attr], index) => {
+                    setTimeout(() => {
+                        this.animateSingleAttribute(key, attr);
+                    }, index * 300);
+                });
+            }
+            
+            animateSingleAttribute(key, attr) {
+                const fillElement = document.getElementById(`${attr.element}-fill`);
+                const valueElement = document.getElementById(`${attr.element}-value`);
+                
+                if (!fillElement || !valueElement) {
+                    console.warn(`⚠️ 找不到属性元素: ${key}`);
+                    return;
+                }
+                
+                // 如果当前值等于目标值，直接设置（不增长的属性）
+                if (attr.current === attr.target) {
+                    fillElement.style.width = `${attr.target}%`;
+                    valueElement.textContent = `${attr.target}/100`;
+                    console.log(`📊 ${key}: 保持 ${attr.current}`);
+                    return;
+                }
+                
+                // 设置目标宽度百分比
+                const targetPercent = attr.target;
+                fillElement.style.width = `${targetPercent}%`;
+                
+                // 数值动画（只有增长的属性才有动画）
+                let currentValue = attr.current;
+                const increment = (attr.target - attr.current) / 30; // 30步完成动画
+                const interval = setInterval(() => {
+                    currentValue += increment;
+                    if (currentValue >= attr.target) {
+                        currentValue = attr.target;
+                        clearInterval(interval);
+                    }
+                    valueElement.textContent = `${Math.round(currentValue)}/100`;
+                }, 100);
+                
+                console.log(`📊 ${key}: ${attr.current} → ${attr.target}`);
+            }
+            
+            showActionButton(text, clickHandler) {
+                this.actionButton.textContent = text;
+                this.actionButton.onclick = clickHandler;
+                this.actionButton.classList.remove('hidden', 'jade-position');
+                this.actionButton.classList.add('show');
+                console.log(`🔘 显示操作按钮: ${text}`);
+            }
+            
+            showJadeButton(text, clickHandler) {
+                this.actionButton.textContent = text;
+                this.actionButton.onclick = clickHandler;
+                this.actionButton.classList.remove('hidden');
+                this.actionButton.classList.add('show', 'jade-position');
+                console.log(`🔘 显示玉佩按钮: ${text}`);
+            }
+            
+            hideActionButton() {
+                this.actionButton.classList.add('hidden');
+                this.actionButton.classList.remove('show', 'jade-position');
+                console.log('🫥 隐藏操作按钮');
+            }
+            
+            showSubtitle(text) {
+                console.log(`🧪 [DEBUG] 开始显示字幕: "${text}"`);
+                console.log(`🧪 [DEBUG] 字幕元素:`, this.subtitleElement);
+                
+                if (!this.subtitleElement) {
+                    console.error('❌ 字幕元素不存在！');
+                    return;
+                }
+                
+                // 设置文本内容
+                this.subtitleElement.textContent = text;
+                
+                // 移除hidden类，添加show类
+                this.subtitleElement.classList.remove('hidden');
+                this.subtitleElement.classList.add('show');
+                
+                // 强制设置样式，确保显示
+                this.subtitleElement.style.display = 'block';
+                this.subtitleElement.style.opacity = '1';
+                this.subtitleElement.style.zIndex = '9999999';
+                this.subtitleElement.style.position = 'fixed';
+                this.subtitleElement.style.bottom = '600px';
+                this.subtitleElement.style.left = '50%';
+                this.subtitleElement.style.transform = 'translateX(-50%)';
+                this.subtitleElement.style.background = 'rgba(0, 0, 0, 0.7)';
+                this.subtitleElement.style.color = 'white';
+                this.subtitleElement.style.padding = '15px 25px';
+                this.subtitleElement.style.borderRadius = '25px';
+                this.subtitleElement.style.border = 'none';
+                this.subtitleElement.style.fontSize = '22px';
+                this.subtitleElement.style.fontWeight = 'bold';
+                this.subtitleElement.style.textAlign = 'center';
+                this.subtitleElement.style.maxWidth = '600px';
+                
+                console.log(`🧪 [DEBUG] 字幕类名: ${this.subtitleElement.className}`);
+                console.log(`🧪 [DEBUG] 字幕文本: "${this.subtitleElement.textContent}"`);
+                
+                // 检查最终样式
+                setTimeout(() => {
+                    const style = window.getComputedStyle(this.subtitleElement);
+                    console.log(`🧪 [DEBUG] 最终 display: ${style.display}`);
+                    console.log(`🧪 [DEBUG] 最终 opacity: ${style.opacity}`);
+                    console.log(`🧪 [DEBUG] 最终 z-index: ${style.zIndex}`);
+                    console.log(`🧪 [DEBUG] 最终 position: ${style.position}`);
+                }, 100);
+                
+                console.log(`✅ 字幕显示完成: ${text}`);
+            }
+            
+            testSubtitle() {
+                console.log('🧪 测试字幕显示');
+                if (this.subtitleElement.classList.contains('show')) {
+                    this.hideSubtitle();
+                } else {
+                    this.showSubtitle('这玉佩....能吸收星光？');
+                }
+            }
+            
+            hideSubtitle() {
+                this.subtitleElement.classList.add('hidden');
+                this.subtitleElement.classList.remove('show');
+                console.log('🫥 隐藏字幕');
+            }
+            
+            addShockTransition(callback) {
+                console.log('💥 触发优化版震撼过渡效果 - 参考镜头2震动优化');
+                
+                // 使用优化的震撼转场效果
+                this.triggerAwakeningShockEffect(callback);
+            }
+            
+            triggerAwakeningShockEffect(callback) {
+                console.log('💥 触发觉醒震撼转场效果');
+                
+                // 添加震撼效果到主容器
+                this.container.classList.add('awakening-shock-effect');
+                document.body.classList.add('body-shake-awakening');
+                
+                // 创建觉醒闪光效果
+                this.createAwakeningFlash();
+                
+                // 创建冲击波效果
+                this.createAwakeningShockwave();
+                
+                // 设备震动 (如果支持)
+                if (navigator.vibrate) {
+                    navigator.vibrate([100, 50, 300, 100, 300, 100, 200, 50, 100]);
+                }
+                
+                // 显示震撼效果状态
+                this.updateStatus('⚡ 觉醒能量爆发中...');
+                
+                // 移除震撼效果类 - 适配新的0.5s速度
+                setTimeout(() => {
+                    this.container.classList.remove('awakening-shock-effect');
+                    document.body.classList.remove('body-shake-awakening');
+                    this.updateStatus('🌟 震撼转场完成');
+                    console.log('✅ 觉醒震撼转场效果完成');
+                    
+                    // 执行回调
+                    if (callback) {
+                        callback();
+                    }
+                }, 500); // 从800ms减少到500ms
+            }
+            
+            createAwakeningFlash() {
+                const flash = document.createElement('div');
+                flash.className = 'awakening-flash';
+                flash.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.3) 30%, rgba(255,255,255,0.1) 60%, transparent 80%);
+                    z-index: 9998;
+                    opacity: 0;
+                    pointer-events: none;
+                    transition: opacity 0.12s ease-out;
+                `;
+                document.body.appendChild(flash);
+                
+                // 更柔和的闪光时序，快速亮起然后柔和消退
+                setTimeout(() => flash.style.opacity = '1', 75);   // 爆发点亮起
+                setTimeout(() => flash.style.opacity = '0.5', 150); // 开始消退
+                setTimeout(() => flash.style.opacity = '0.2', 250); // 继续消退
+                setTimeout(() => flash.style.opacity = '0', 400);   // 完全消失，为阶段3让路
+                setTimeout(() => flash.remove(), 500);
+            }
+            
+            createAwakeningShockwave() {
+                // 创建2层柔和的白色冲击波
+                for (let i = 0; i < 2; i++) {
+                    setTimeout(() => {
+                        const shockwave = document.createElement('div');
+                        shockwave.style.cssText = `
+                            position: fixed;
+                            top: 50%;
+                            left: 50%;
+                            width: 60px;
+                            height: 60px;
+                            border: ${2 - i}px solid rgba(255, 255, 255, ${0.4 - i * 0.1});
+                            border-radius: 50%;
+                            z-index: 9997;
+                            animation: awakening-shockwave 0.5s ease-out;
+                            animation-delay: ${i * 0.1}s;
+                            pointer-events: none;
+                            transform: translate(-50%, -50%) scale(0);
+                            box-shadow: 0 0 ${15 - i * 5}px rgba(255, 255, 255, ${0.3 - i * 0.1});
+                        `;
+                        document.body.appendChild(shockwave);
+                        
+                        setTimeout(() => shockwave.remove(), 600);
+                    }, i * 100); // 适中的间隔
+                }
+            }
+            
+            addButtonShockEffect() {
+                console.log('🔘 触发按钮震动效果');
+                
+                // 创建镜头2风格的点击波纹效果
+                this.createClickRipple();
+                
+                // 添加按钮震动效果
+                this.actionButton.classList.add('button-shock');
+                
+                // 400ms后清理效果
+                setTimeout(() => {
+                    this.actionButton.classList.remove('button-shock');
+                }, 400);
+            }
+            
+            createClickRipple() {
+                // 创建波纹元素
+                const ripple = document.createElement('div');
+                ripple.style.cssText = `
+                    position: absolute;
+                    width: 20px;
+                    height: 20px;
+                    background: rgba(255, 255, 255, 0.8);
+                    border-radius: 50%;
+                    transform: translate(-50%, -50%);
+                    animation: clickRipple 0.8s ease-out forwards;
+                    pointer-events: none;
+                    top: 50%;
+                    left: 50%;
+                    z-index: 10;
+                    box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+                `;
+                
+                // 将波纹添加到按钮中
+                this.actionButton.appendChild(ripple);
+                
+                console.log('💫 创建增强点击波纹效果');
+                
+                // 800ms后清理波纹
+                setTimeout(() => {
+                    if (ripple.parentNode) {
+                        ripple.remove();
+                    }
+                }, 800);
+            }
+            
+            updatePhaseDisplay(phase) {
+                this.phaseIndicator.textContent = phase;
+                this.currentPhaseSpan.textContent = this.currentPhase;
+            }
+            
+            updateStatus(status) {
+                this.sceneStatus.textContent = status;
+            }
+            
+            updateVideoStatus(status) {
+                this.videoStatus.textContent = status;
+            }
+            
+            showCompletionMessage() {
+                const message = document.createElement('div');
+                message.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(0, 0, 0, 0.95);
+                    color: #FFD700;
+                    padding: 40px;
+                    border-radius: 20px;
+                    border: 3px solid #FFD700;
+                    text-align: center;
+                    z-index: 99999;
+                    font-size: 18px;
+                    max-width: 500px;
+                    box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+                `;
+                
+                message.innerHTML = `
+                    <h3 style="color: #FFD700; margin-bottom: 20px; font-size: 24px;">🌟 觉醒完成 🌟</h3>
+                    <p style="margin-bottom: 15px;">你已成功完成觉醒旅程</p>
+                    <p style="margin-bottom: 15px;">五维属性已得到强化</p>
+                    <p style="margin-bottom: 25px;">准备迎接新的挑战</p>
+                    <button onclick="this.parentElement.remove(); scene4.nextScene();" 
+                            style="padding: 12px 25px; background: #FFD700; color: #000; border: none; 
+                                   border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold;">
+                        继续冒险
+                    </button>
+                `;
+                
+                document.body.appendChild(message);
+                console.log('🎉 显示完成信息');
+            }
+            
+            // 跳转到指定阶段（调试功能）
+            async skipToPhase(phase) {
+                console.log(`⚡ 快速跳转到阶段${phase}`);
+                
+                switch (phase) {
+                    case 2:
+                        await this.startPhase2();
+                        break;
+                    case 3:
+                        await this.startPhase3();
+                        break;
+                    case 4:
+                        await this.startPhase4();
+                        break;
+                    default:
+                        await this.startPhase1();
+                }
+            }
+            
+            restartScene() {
+                console.log('🔄 重新开始镜头4');
+                location.reload();
+            }
+            
+            nextScene() {
+                console.log('➡️ 前往下一镜头');
+                // 停止所有媒体
+                this.mainVideo.pause();
+                this.backgroundAudio.pause();
+                
+                // 在iframe环境中通知父页面
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'scene4-complete' }, '*');
+                } else {
+                    // 独立运行时直接跳转到镜头5
+                    window.location.href = 'scene5-new.html';
+                }
+            }
+
+            // 新增：手动播放覆盖层
+            showManualPlayCover() {
+                if (document.getElementById('manual-play-cover')) return;
+                const cover = document.createElement('div');
+                cover.id = 'manual-play-cover';
+                cover.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: rgba(0,0,0,0.8);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #fff;
+                    font-size: 18px;
+                    z-index: 999999;
+                    cursor: pointer;
+                `;
+                cover.textContent = '点击以继续播放';
+                cover.addEventListener('click', async () => {
+                    cover.remove();
+                    this.mainVideo.muted = false; // 恢复声音
+                    try {
+                        await this.mainVideo.play();
+                        this.updateVideoStatus('阶段1播放中');
+                        this.updateStatus('播放中');
+                    } catch (e) {
+                        console.error('❌ 用户点击后仍无法播放:', e);
+                        this.updateStatus('播放失败');
+                    }
+                });
+                document.body.appendChild(cover);
+            }
+
+            showContinuePrompt(){
+                if(document.getElementById('continue-overlay')) return;
+                const overlay=document.createElement('div');
+                overlay.id='continue-overlay';
+                overlay.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.6);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:20vh;z-index:999999;cursor:pointer;';
+                overlay.innerHTML='<div style="font-size:48px;color:#fff;animation:handShake 1.2s infinite;">👇</div><div style="font-size:20px;color:#fff;">点击屏幕继续</div>';
+                overlay.addEventListener('click',()=>{
+                    overlay.remove();
+                    this.endScene4();
+                });
+                document.body.appendChild(overlay);
+            }
+
+            endScene4(){
+                // 停止视频
+                this.mainVideo.pause();
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'scene4-complete' }, '*');
+                } else {
+                    // 独立运行时直接跳转到镜头5
+                    this.nextScene();
+                }
+            }
+
+            // ✨ 平滑切换主视频，避免黑屏
+            crossfadeMainVideo(newSrc, {
+                muted = true,
+                loop = false,
+                autoplay = true
+            } = {}) {
+                return new Promise((resolve) => {
+                    if (this.mainVideo.src.includes(newSrc)) {
+                        resolve(this.mainVideo);
+                        return;
+                    }
+
+                    const nextVideo = document.createElement('video');
+                    nextVideo.className = this.mainVideo.className || 'video-player';
+                    nextVideo.preload = 'auto';
+                    nextVideo.muted = muted;
+                    nextVideo.loop = loop;
+                    nextVideo.playsInline = true;
+                    nextVideo.style.opacity = '0';
+                    nextVideo.style.transition = 'opacity 0.4s ease';
+
+                    this.container.appendChild(nextVideo);
+
+                    const doPlay = () => {
+                        if (autoplay) {
+                            nextVideo.play().catch(() => {});
+                        }
+                        requestAnimationFrame(() => {
+                            nextVideo.style.opacity = '1';
+                            this.mainVideo.style.transition = 'opacity 0.4s ease';
+                            this.mainVideo.style.opacity = '0';
+
+                            setTimeout(() => {
+                                try { this.mainVideo.pause(); } catch(e) {}
+                                if (this.mainVideo.parentNode) this.mainVideo.parentNode.removeChild(this.mainVideo);
+                                this.mainVideo = nextVideo;
+                                resolve(nextVideo);
+                            }, 400);
+                        });
+                    };
+
+                    if (window.videoPreloader) {
+                        const pre = window.videoPreloader.getPreloadedVideo(newSrc);
+                        if (pre) {
+                            nextVideo.src = newSrc;
+                        } else {
+                            window.videoPreloader.preloadVideo(newSrc).finally(() => { nextVideo.src = newSrc; });
+                        }
+                    } else {
+                        nextVideo.src = newSrc;
+                    }
+
+                    nextVideo.addEventListener('loadeddata', () => doPlay());
+                });
+            }
+        }
+        
+        // 全局实例
+        let scene4;
+        
+        // 全局测试函数
+        function testAwakeningShock() {
+            console.log('🧪 测试觉醒震撼转场效果');
+            if (scene4) {
+                scene4.triggerAwakeningShockEffect();
+            }
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            scene4 = new Scene4AwakeningJourney();
+        });
+        
+        // 添加快捷键支持
+        document.addEventListener('keydown', (e) => {
+            if (!scene4) return;
+            
+            switch(e.key) {
+                case '1':
+                    scene4.skipToPhase(1);
+                    break;
+                case '2':
+                    scene4.skipToPhase(2);
+                    break;
+                case '3':
+                    scene4.skipToPhase(3);
+                    break;
+                case '4':
+                    scene4.skipToPhase(4);
+                    break;
+                case 'r':
+                case 'R':
+                    scene4.restartScene();
+                    break;
+                case 'n':
+                case 'N':
+                    scene4.nextScene();
+                    break;
+                case 's':
+                case 'S':
+                    testAwakeningShock();
+                    break;
+            }
+        });
+        
+        console.log('🎮 镜头4控制：数字键1-4=跳转阶段, S=测试震撼转场, R=重启, N=下一镜头');
+    </script>
+</body>
+</html>

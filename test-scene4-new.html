@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镜头4测试页面 - 代号qin</title>
+    
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            color: #FFD700;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        
+        .description {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .test-info {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid #FFD700;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .phase {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        
+        .phase-title {
+            color: #90EE90;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .launch-button {
+            background: linear-gradient(135deg, #32CD32 0%, #228B22 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .launch-button:hover {
+            background: linear-gradient(135deg, #228B22 0%, #006400 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(50, 205, 50, 0.3);
+        }
+        
+        .back-button {
+            background: linear-gradient(135deg, #2980B9 0%, #3498DB 100%);
+        }
+        
+        .back-button:hover {
+            background: linear-gradient(135deg, #3498DB 0%, #5DADE2 100%);
+        }
+        
+        .note {
+            background: rgba(255, 99, 71, 0.2);
+            border: 1px solid #FF6347;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+        
+        .control-title {
+            color: #FFD700;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌟 镜头4：觉醒旅程 (新版) - 已优化</h1>
+        <p class="description">
+            全新升级的镜头4已经完成并优化！修复了所有问题：✅ 视频保留原声 ✅ 属性界面移至右侧 ✅ 按钮使用镜头1风格
+        </p>
+        
+        <div class="test-info">
+            <h3 style="color: #FFD700; margin-top: 0;">📋 实现功能清单</h3>
+            
+            <div class="phase">
+                <div class="phase-title">🎵 背景音乐：</div>
+                镜头4/1/S04001.MP3 全程循环播放（低音量，不干扰视频原声）
+            </div>
+            
+            <div class="phase">
+                <div class="phase-title">🎬 阶段1：</div>
+                播放镜头4/1/C04001-1.mp4（✅ 保留原声），播完后显示圆形"起身"按钮
+            </div>
+            
+            <div class="phase">
+                <div class="phase-title">🚶 阶段2：</div>
+                用户点击"起身"按钮后播放镜头4/2/c04002-1.mp4（✅ 保留原声），在最后一帧暂停并显示"触摸玉佩"按钮（✅ 按钮定位在玉佩上）
+            </div>
+            
+            <div class="phase">
+                <div class="phase-title">💎 阶段3：</div>
+                用户点击"触摸玉佩"按钮（✅ 带震动+增强震撼效果）后播放镜头4/3/C04003-1.mp4（✅ 保留原声），在8秒时显示白色字幕"这玉佩....能吸收星光？"并弹出右侧五维属性界面（✅ 武德进度条白色发光），播完后进入阶段4
+            </div>
+            
+            <div class="phase">
+                <div class="phase-title">✨ 阶段4：</div>
+                播放镜头4/4/c04004-1.mp4（✅ 保留原声，正播→倒播→正播循环，1.5倍慢速）
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-title">🎮 控制方式</div>
+            <ul style="text-align: left; margin: 10px 0;">
+                <li>数字键 1-4：快速跳转到对应阶段</li>
+                <li>R键：重新开始镜头</li>
+                <li>N键：跳转到下一镜头</li>
+                <li>右上角控制面板：可视化操作按钮</li>
+            </ul>
+        </div>
+        
+        <div class="note">
+            <strong>⚠️ 注意：</strong>
+            确保镜头4文件夹中有对应的视频和音频文件。如果文件不存在，会在控制台显示错误信息。
+            视频格式支持：.mp4，音频格式支持：.mp3
+        </div>
+        
+        <div style="background: rgba(50, 205, 50, 0.2); border: 1px solid #32CD32; border-radius: 10px; padding: 15px; margin: 20px 0; font-size: 14px;">
+            <strong style="color: #32CD32;">✅ 最新优化（完美版）：</strong>
+            <ul style="text-align: left; margin: 10px 0 0 20px; line-height: 1.6;">
+                <li><strong>按钮定位：</strong> "触摸玉佩"按钮精确定位在玉佩上（65%, 45%）</li>
+                <li><strong>震撼效果：</strong> 增强震撼过渡效果，更明显的视觉冲击</li>
+                <li><strong>武德特色：</strong> 武德进度条改为白色发光，区别于其他属性</li>
+                <li><strong>交互反馈：</strong> 按钮震动+全屏震撼，双重视觉反馈</li>
+                <li><strong>视觉优化：</strong> 界面隐藏滚动条，整体更美观</li>
+            </ul>
+        </div>
+        
+        <a href="scene4-new-awakening.html" class="launch-button">
+            🚀 启动新版镜头4
+        </a>
+        
+        <a href="scene4-awakening.html" class="launch-button">
+            📼 对比原版镜头4
+        </a>
+        
+        <a href="scene-overview.html" class="launch-button back-button">
+            ⬅️ 返回总览
+        </a>
+        
+        <div style="margin-top: 30px; font-size: 14px; opacity: 0.7;">
+            <p>🎯 <strong>开发完成时间：</strong> 2024年</p>
+            <p>💻 <strong>技术栈：</strong> HTML5 + CSS3 + JavaScript</p>
+            <p>🎨 <strong>特色功能：</strong> 多阶段视频播放、用户交互、属性系统、动画效果</p>
+        </div>
+    </div>
+
+    <script>
+        // 快捷键支持
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case '1':
+                    window.open('scene4-new-awakening.html', '_blank');
+                    break;
+                case '2':
+                    window.open('scene4-awakening.html', '_blank');
+                    break;
+                case 'Escape':
+                    window.location.href = 'scene-overview.html';
+                    break;
+            }
+        });
+        
+        console.log('🎮 快捷键：1=新版镜头4, 2=原版镜头4, ESC=返回总览');
+        console.log('🎬 镜头4（新版）测试页面加载完成');
+    </script>
+</body>
+</html>

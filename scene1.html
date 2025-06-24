@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镜头1：衣柜视角 - 沉浸式动态互动绘本</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="config.js"></script>
+</head>
+<body>
+    <div class="story-container">
+        <!-- 镜头1：衣柜视角开场 -->
+        <section class="scene scene-1 active" id="scene-1">
+            <!-- 背景客厅场景 -->
+            <div class="background-scene">
+                <img src="镜头1/1/视线模糊.png" alt="模糊的客厅场景" class="blur-scene">
+                <video src="镜头1/1/视线清晰.mp4" alt="清晰的客厅场景" class="clear-scene" muted loop autoplay playsinline preload="auto"></video>
+            </div>
+            
+            <!-- 衣柜门遮罩 -->
+            <div class="cabinet-doors">
+                <div class="door left-door">
+                    <img src="镜头1/1/柜门left.png" alt="左侧柜门">
+                </div>
+                <div class="door right-door">
+                    <img src="镜头1/1/柜门right.png" alt="右侧柜门">
+                </div>
+            </div>
+            
+            <!-- 血迹效果 - 已移除，与人+门效果重复 -->
+            
+            <!-- 瞳孔震颤效果 - 使用专用瞳孔图片 -->
+            <div class="pupil-shake">
+                <!-- 使用专用的瞳孔图片，避免与背景重复 -->
+            </div>
+            
+            <!-- 白光闪烁效果 -->
+            <div class="white-flash"></div>
+            
+            <!-- 点击提示 -->
+            <div class="click-hint">点击屏幕向前查看</div>
+        </section>
+        
+        <!-- 简单的控制台面板 -->
+        <div class="story-controls" style="
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: #00ff88;
+            border: 1px solid #00ff88;
+            border-radius: 8px;
+            padding: 15px;
+            z-index: 1000;
+            display: none;
+            font-size: 12px;
+        ">
+            <h4>🎮 镜头1调试面板</h4>
+            <p>~ 键切换显示/隐藏</p>
+            <button onclick="location.href='index-story.html'" style="
+                background: #1a1a1a;
+                color: #00ff88;
+                border: 1px solid #00ff88;
+                padding: 5px 10px;
+                border-radius: 4px;
+                cursor: pointer;
+                margin: 5px 0;
+            ">返回主页</button>
+        </div>
+        
+        <!-- 下一个场景预留 -->
+        <section class="scene scene-2" id="scene-2">
+            <div class="next-scene-placeholder">
+                <h2>下一个场景...</h2>
+                <p>剧情继续...</p>
+            </div>
+        </section>
+    </div>
+    
+    <!-- 音频控制 -->
+    <audio id="heartbeat" loop>
+        <source src="sounds/heartbeat.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="rain" loop>
+        <source src="sounds/rain.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="knife-sound">
+        <source src="sounds/knife.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="chat">
+        <source src="sounds/Chat.mp3" type="audio/mpeg">
+    </audio>
+    
+    <script src="video-preloader.js"></script>
+    <script src="script.js"></script>
+    <script src="scripts/keyboardToggle.js"></script>
+    
+    <script>
+        // 镜头1视频优化
+        document.addEventListener('DOMContentLoaded', () => {
+            const video = document.querySelector('.clear-scene');
+            if (video) {
+                // 添加加载状态监听
+                video.addEventListener('loadstart', () => {
+                    console.log('🎥 镜头1视频开始加载...');
+                });
+                
+                video.addEventListener('loadeddata', () => {
+                    console.log('✅ 镜头1视频加载完成');
+                });
+                
+                video.addEventListener('waiting', () => {
+                    console.log('⏳ 镜头1视频缓冲中...');
+                    if (window.videoPreloader) {
+                        window.videoPreloader.showLoading('视频缓冲中...');
+                    }
+                });
+                
+                video.addEventListener('canplay', () => {
+                    console.log('▶️ 镜头1视频可以播放');
+                    if (window.videoPreloader) {
+                        window.videoPreloader.hideLoading();
+                    }
+                });
+                
+                // 预加载下一镜头的视频
+                if (window.videoPreloader) {
+                    setTimeout(() => {
+                        const nextVideos = ['镜头2/N001.mp4', '镜头2/N002.mp4'];
+                        console.log('🎥 预加载下一镜头视频...');
+                        window.videoPreloader.preloadVideoList(nextVideos);
+                    }, 3000); // 3秒后开始预加载
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

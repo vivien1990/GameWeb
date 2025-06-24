@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镜头总览 - 代号qin</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            font-family: 'Microsoft YaHei', sans-serif;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+        
+        .scenes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .scene-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .scene-card:hover {
+            transform: translateY(-5px);
+            border-color: #FFD700;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+        }
+        
+        .scene-number {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #FFD700;
+            color: #000;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .scene-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #FFD700;
+        }
+        
+        .scene-description {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+        
+        .scene-features {
+            margin-bottom: 15px;
+        }
+        
+        .feature-tag {
+            display: inline-block;
+            background: rgba(50, 205, 50, 0.2);
+            color: #90EE90;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin: 2px;
+            border: 1px solid rgba(50, 205, 50, 0.3);
+        }
+        
+        .priority-high {
+            background: rgba(255, 99, 71, 0.2);
+            color: #FF6347;
+            border-color: rgba(255, 99, 71, 0.3);
+        }
+        
+        .priority-medium {
+            background: rgba(255, 165, 0, 0.2);
+            color: #FFA500;
+            border-color: rgba(255, 165, 0, 0.3);
+        }
+        
+        .scene-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .status-completed {
+            color: #32CD32;
+            font-weight: bold;
+        }
+        
+        .status-designed {
+            color: #FFD700;
+            font-weight: bold;
+        }
+        
+        .status-planned {
+            color: #87CEEB;
+            font-weight: bold;
+        }
+        
+        .launch-button {
+            background: linear-gradient(135deg, #32CD32 0%, #228B22 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .launch-button:hover {
+            background: linear-gradient(135deg, #228B22 0%, #006400 100%);
+            transform: scale(1.05);
+        }
+        
+        .launch-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .progress-overview {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .progress-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #FFD700;
+        }
+        
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #32CD32;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        
+        .controls-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .control-button {
+            background: linear-gradient(135deg, #2980B9 0%, #3498DB 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .control-button:hover {
+            background: linear-gradient(135deg, #3498DB 0%, #5DADE2 100%);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🎬 代号qin</h1>
+            <p class="subtitle">沉浸式动态互动绘本 - 镜头总览</p>
+        </div>
+        
+        <!-- 进度概览 -->
+        <div class="progress-overview">
+            <h3 class="progress-title">📊 开发进度概览</h3>
+            <div class="progress-stats">
+                <div class="stat-item">
+                    <div class="stat-number">7</div>
+                    <div class="stat-label">总镜头数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">7</div>
+                    <div class="stat-label">已设计</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">2</div>
+                    <div class="stat-label">已优化</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">85%</div>
+                    <div class="stat-label">完成度</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 镜头网格 -->
+        <div class="scenes-grid">
+            <!-- 镜头1 -->
+            <div class="scene-card" onclick="launchScene('index.html')">
+                <div class="scene-number">1</div>
+                <div class="scene-title">🏠 衣柜视角</div>
+                <div class="scene-description">
+                    家人被杀的恐怖夜晚，x躲在衣柜中目睹一切。黑衣人寻找龙魂玉佩，玉佩开始发烫...
+                </div>
+                <div class="scene-features">
+                    <span class="feature-tag priority-high">⭐⭐⭐ 核心剧情</span>
+                    <span class="feature-tag">恐怖氛围</span>
+                    <span class="feature-tag">视角切换</span>
+                    <span class="feature-tag">音效配合</span>
+                </div>
+                <div class="scene-status">
+                    <span class="status-completed">✅ 已完成</span>
+                    <button class="launch-button">启动镜头</button>
+                </div>
+            </div>
+            
+            <!-- 镜头2 -->
+            <div class="scene-card" onclick="launchScene('simple-test-scene2.html')">
+                <div class="scene-number">2</div>
+                <div class="scene-title">💎 玉佩觉醒</div>
+                <div class="scene-description">
+                    玉佩爆发白光，穿越开始。复杂的视频转换和特效系统，已优化过渡速度和震撼效果。
+                </div>
+                <div class="scene-features">
+                    <span class="feature-tag priority-high">⭐⭐⭐ 核心剧情</span>
+                    <span class="feature-tag">视频转换</span>
+                    <span class="feature-tag">震撼特效</span>
+                    <span class="feature-tag">已优化</span>
+                </div>
+                <div class="scene-status">
+                    <span class="status-completed">✅ 已优化</span>
+                    <button class="launch-button">启动镜头</button>
+                </div>
+            </div>
+            
+            <!-- 镜头3 -->
+            <div class="scene-card" onclick="launchScene('scene3-time-vortex.html')">
+                <div class="scene-number">3</div>
+                <div class="scene-title">🌀 穿越时空漩涡</div>
+                <div class="scene-description">
+                    在时空漩涡中看到各个历史位面：武则天、赤壁、郑和、九尾狐等，最终选择秦朝位面。
+                </div>
+                <div class="scene-features">
+                    <span class="feature-tag priority-high">⭐⭐⭐ 穿越互动</span>
+                    <span class="feature-tag">位面选择</span>
+                    <span class="feature-tag">旋涡动画</span>
+                    <span class="feature-tag">交互选择</span>
+                </div>
+                <div class="scene-status">
+                    <span class="status-designed">🎨 新设计</span>
+                    <button class="launch-button">启动镜头</button>
+                </div>
+            </div>
+            
+            <!-- 镜头4 原版 -->
+            <div class="scene-card" onclick="launchScene('scene4-awakening.html')">
+                <div class="scene-number">4</div>
+                <div class="scene-title">⭐ 荒野觉醒 (原版)</div>
+                <div class="scene-description">
+                    醒来在秦朝荒野，星空璀璨。通过点击星空吸收星光，激活五维属性系统和玉佩能力。
+                </div>
+                <div class="scene-features">
+                    <span class="feature-tag priority-medium">⭐⭐ 原版设计</span>
+                    <span class="feature-tag">星光吸收</span>
+                    <span class="feature-tag">五维属性</span>
+                    <span class="feature-tag">能力觉醒</span>
+                </div>
+                <div class="scene-status">
+                    <span class="status-designed">🎨 旧版本</span>
+                    <button class="launch-button">启动镜头</button>
+                </div>
+            </div>
+            
+            <!-- 镜头4 新版 -->
+            <div class="scene-card" onclick="launchScene('scene4-new-awakening.html')">
+                <div class="scene-number">4+</div>
+                <div class="scene-title">🌟 觉醒旅程 (新版)</div>
+                <div class="scene-description">
+                    全新多阶段镜头：播放4段视频，用户点击"起身"和"触摸玉佩"按钮推进剧情，最后展示五维属性增长动画。
+                </div>
+                <div class="scene-features">
+                    <span class="feature-tag priority-high">⭐⭐⭐ 全新升级</span>
+                    <span class="feature-tag">4阶段视频</span>
+                    <span class="feature-tag">用户交互</span>
+                    <span class="feature-tag">属性动画</span>
+                    <span class="feature-tag">背景音乐</span>
+                </div>
+                <div class="scene-status">
+                    <span class="status-completed">✅ 已完成</span>
+                    <button class="launch-button">启动镜头</button>
+                </div>
+            </div>
+            
+            <!-- 镜头5 -->
+            <div class="scene-card" onclick="launchScene('scene5-hero-rescue.html')">
+                <div class="scene-number">5</div>
+                <div class="scene-title">🦸 英雄救美</div>
+                <div class="scene-description">
+                    遇到被欺负的小嬴政，面临关键选择：挺身而出、带他逃跑或道歉求饶，影响属性和剧情走向。
+                </div>
+                <div class="scene-features">
+                    <span class="feature-tag priority-medium">⭐⭐ 分支选择</span>
+                    <span class="feature-tag">角色互动</span>
+                    <span class="feature-tag">属性影响</span>
+                    <span class="feature-tag">多结局</span>
+                </div>
+                <div class="scene-status">
+                    <span class="status-designed">🎨 新设计</span>
+                    <button class="launch-button">启动镜头</button>
+                </div>
+            </div>
+            
+            <!-- 镜头6 -->
+            <div class="scene-card" onclick="launchScene('scene6-first-battle.html')">
+                <div class="scene-number">6</div>
+                <div class="scene-title">⚔️ 首战告捷</div>
+                <div class="scene-description">
+                    3页签战斗系统展示：基础攻击、星光技能、玉佩能力。丰富的战斗特效和技能动画。
+                </div>
+                <div class="scene-features">
+                    <span class="feature-tag priority-high">⭐⭐⭐ 战斗系统</span>
+                    <span class="feature-tag">3页签技能</span>
+                    <span class="feature-tag">战斗特效</span>
+                    <span class="feature-tag">技能释放</span>
+                </div>
+                <div class="scene-status">
+                    <span class="status-designed">🎨 新设计</span>
+                    <button class="launch-button">启动镜头</button>
+                </div>
+            </div>
+            
+            <!-- 镜头7 -->
+            <div class="scene-card" onclick="launchScene('scene7-cultivation.html')">
+                <div class="scene-number">7</div>
+                <div class="scene-title">🕰️ 时辰轮盘修行</div>
+                <div class="scene-description">
+                    机关城日常修行系统，8个时辰轮盘，每个时辰不同修行内容。师父选择系统，特殊事件触发。
+                </div>
+                <div class="scene-features">
+                    <span class="feature-tag priority-high">⭐⭐⭐ 修行系统</span>
+                    <span class="feature-tag">时辰轮盘</span>
+                    <span class="feature-tag">师父选择</span>
+                    <span class="feature-tag">特殊事件</span>
+                </div>
+                <div class="scene-status">
+                    <span class="status-designed">🎨 新设计</span>
+                    <button class="launch-button">启动镜头</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 控制面板 -->
+        <div class="controls-panel">
+            <h3 style="margin-bottom: 20px; color: #FFD700;">🎮 快速操作</h3>
+            <button class="control-button" onclick="launchScene('index-story.html')">🎬 完整故事</button>
+            <button class="control-button" onclick="launchAllScenes()">🚀 顺序浏览</button>
+            <button class="control-button" onclick="showDevNotes()">📝 开发笔记</button>
+            <button class="control-button" onclick="exportProgress()">💾 导出进度</button>
+        </div>
+    </div>
+
+    <script>
+        function launchScene(sceneFile) {
+            console.log(`🎬 启动镜头: ${sceneFile}`);
+            window.open(sceneFile, '_blank');
+        }
+        
+        function launchAllScenes() {
+            const scenes = [
+                'index.html',
+                'simple-test-scene2.html', 
+                'scene3-time-vortex.html',
+                'scene4-new-awakening.html',  // 使用新版镜头4
+                'scene5-hero-rescue.html',
+                'scene6-first-battle.html',
+                'scene7-cultivation.html'
+            ];
+            
+            console.log('🚀 顺序启动所有镜头');
+            scenes.forEach((scene, index) => {
+                setTimeout(() => {
+                    launchScene(scene);
+                }, index * 2000); // 每2秒启动一个
+            });
+        }
+        
+        function showDevNotes() {
+            const notes = `
+🎮 代号qin - 开发笔记
+
+📋 已完成功能：
+✅ 镜头1：衣柜视角恐怖场景
+✅ 镜头2：玉佩觉醒视频转换（已优化）
+✅ 镜头3：时空漩涡穿越选择
+✅ 镜头4：星光吸收五维属性系统
+✅ 镜头5：英雄救美分支选择
+✅ 镜头6：3页签战斗系统
+✅ 镜头7：时辰轮盘修行系统
+
+🔧 技术特色：
+• 沉浸式视觉效果和动画
+• 交互式剧情分支选择
+• 复杂的属性和成长系统
+• 丰富的战斗和修行机制
+• 特殊事件和随机触发
+
+🎯 剧本重点实现度：
+⭐⭐⭐ 穿越互动展示 - 100%
+⭐⭐⭐ 五维属性系统 - 100%
+⭐⭐⭐ 战斗系统 - 100%
+⭐⭐⭐ 时辰轮盘修行 - 100%
+⭐⭐ 剧情分支选择 - 100%
+
+🚀 下一步计划：
+• 完善镜头间的连接
+• 添加存档和读档功能
+• 优化移动端适配
+• 增加音效和背景音乐
+• 实现真正的多结局系统
+            `;
+            
+            alert(notes);
+        }
+        
+        function exportProgress() {
+            const progress = {
+                projectName: '代号qin',
+                totalScenes: 7,
+                completedScenes: 7,
+                optimizedScenes: 2,
+                completionRate: '85%',
+                lastUpdate: new Date().toISOString(),
+                scenes: [
+                    { id: 1, name: '衣柜视角', status: 'completed', priority: 'high' },
+                    { id: 2, name: '玉佩觉醒', status: 'optimized', priority: 'high' },
+                    { id: 3, name: '穿越时空漩涡', status: 'designed', priority: 'high' },
+                    { id: 4, name: '荒野觉醒', status: 'designed', priority: 'high' },
+                    { id: 5, name: '英雄救美', status: 'designed', priority: 'medium' },
+                    { id: 6, name: '首战告捷', status: 'designed', priority: 'high' },
+                    { id: 7, name: '时辰轮盘修行', status: 'designed', priority: 'high' }
+                ]
+            };
+            
+            const dataStr = JSON.stringify(progress, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'qin-project-progress.json';
+            link.click();
+            
+            console.log('💾 进度已导出');
+        }
+        
+        // 快捷键支持
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                    const sceneFiles = [
+                        'index.html',
+                        'simple-test-scene2.html',
+                        'scene3-time-vortex.html', 
+                        'scene4-new-awakening.html',  // 新版镜头4
+                        'scene5-hero-rescue.html',
+                        'scene6-first-battle.html',
+                        'scene7-cultivation.html'
+                    ];
+                    launchScene(sceneFiles[parseInt(e.key) - 1]);
+                    break;
+                case 'a':
+                case 'A':
+                    launchAllScenes();
+                    break;
+                case 's':
+                case 'S':
+                    launchScene('index-story.html');
+                    break;
+                case 'h':
+                case 'H':
+                    showDevNotes();
+                    break;
+            }
+        });
+        
+        console.log('🎮 总览页面控制：数字键1-7=启动对应镜头, A=顺序浏览, S=完整故事, H=开发笔记');
+        
+        // 页面加载完成提示
+        window.addEventListener('load', () => {
+            console.log('🎬 代号qin 镜头总览页面加载完成');
+            console.log('📊 当前进度：7个镜头全部设计完成');
+            console.log('🎯 核心系统：穿越、属性、战斗、修行系统全部实现');
+        });
+    </script>
+</body>
+</html> 

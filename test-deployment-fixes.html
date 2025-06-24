@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>部署问题修复验证</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .test-button:hover {
+            background: #45a049;
+        }
+        
+        .test-button.warning {
+            background: #ff9800;
+        }
+        
+        .test-button.error {
+            background: #f44336;
+        }
+        
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+        
+        .iframe-container {
+            width: 100%;
+            height: 400px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .keyboard-test {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #4CAF50;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .video-test {
+            background: rgba(255, 165, 0, 0.1);
+            border: 2px solid #ff9800;
+            padding: 15px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 部署问题修复验证</h1>
+        
+        <div class="test-section">
+            <h2>🎯 修复内容总结</h2>
+            <div class="grid">
+                <div class="video-test">
+                    <h3>🎬 镜头5视频切换黑屏修复</h3>
+                    <ul>
+                        <li>✅ 添加视频预加载系统</li>
+                        <li>✅ C05003-2.mp4播放时预加载C05003-1.mp4</li>
+                        <li>✅ 等待视频准备就绪再播放</li>
+                        <li>✅ 无缝视频切换</li>
+                    </ul>
+                </div>
+                <div class="keyboard-test">
+                    <h3>⌨️ 控制台快捷键修复</h3>
+                    <ul>
+                        <li>✅ 增强键盘事件监听</li>
+                        <li>✅ 多层级事件处理</li>
+                        <li>✅ iframe消息传递优化</li>
+                        <li>✅ 部署环境兼容性</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🎮 控制台快捷键测试</h2>
+            <div class="status" id="keyboard-status">准备测试键盘快捷键...</div>
+            <p><strong>测试说明：</strong>在下面的iframe中按 <code>~</code> 或 <code>T</code> 键，观察控制台是否正常切换</p>
+            <div class="iframe-container">
+                <iframe id="story-frame" src="index-story.html"></iframe>
+            </div>
+            <button class="test-button" onclick="testKeyboard()">测试控制台切换</button>
+            <button class="test-button warning" onclick="enableKeyboardDebug()">启用键盘调试</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>🎬 镜头5视频切换测试</h2>
+            <div class="status" id="video-status">准备测试视频切换...</div>
+            <p><strong>测试说明：</strong>跳转到镜头5，观察C05003-2.mp4到C05003-1.mp4的切换是否无黑屏</p>
+            <div class="iframe-container">
+                <iframe id="scene5-frame" src="scene5-new.html"></iframe>
+            </div>
+            <button class="test-button" onclick="goToScene5()">跳转到镜头5</button>
+            <button class="test-button" onclick="skipToPhase3()">直接到阶段3选择</button>
+            <button class="test-button warning" onclick="testVideoTransition()">测试视频切换</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>📊 测试状态</h2>
+            <div class="status" id="overall-status">等待测试...</div>
+            <button class="test-button" onclick="runAllTests()">运行所有测试</button>
+            <button class="test-button error" onclick="clearLog()">清空日志</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>📝 测试日志</h2>
+            <div class="log" id="log"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🔍 部署验证清单</h2>
+            <div class="grid">
+                <div>
+                    <h4>✅ 本地测试确认</h4>
+                    <ul>
+                        <li>控制台快捷键正常</li>
+                        <li>视频切换无黑屏</li>
+                        <li>所有功能正常</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>🚀 部署后验证</h4>
+                    <ul>
+                        <li>Netlify部署成功</li>
+                        <li>控制台快捷键测试</li>
+                        <li>镜头5视频切换测试</li>
+                        <li>各镜头功能测试</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        const keyboardStatus = document.getElementById('keyboard-status');
+        const videoStatus = document.getElementById('video-status');
+        const overallStatus = document.getElementById('overall-status');
+        
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function updateKeyboardStatus(message) {
+            keyboardStatus.textContent = message;
+            addLog(`键盘状态: ${message}`);
+        }
+        
+        function updateVideoStatus(message) {
+            videoStatus.textContent = message;
+            addLog(`视频状态: ${message}`);
+        }
+        
+        function updateOverallStatus(message) {
+            overallStatus.textContent = message;
+            addLog(`总体状态: ${message}`);
+        }
+        
+        function testKeyboard() {
+            updateKeyboardStatus('正在测试键盘快捷键...');
+            addLog('开始键盘测试：请在iframe中按 ~ 或 T 键');
+            
+            // 发送测试信号
+            const iframe = document.getElementById('story-frame');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({type: 'test-keyboard'}, '*');
+            }
+        }
+        
+        function enableKeyboardDebug() {
+            updateKeyboardStatus('启用键盘调试模式...');
+            addLog('启用键盘调试模式');
+            
+            // 发送调试启用信号给所有iframe
+            const iframes = document.querySelectorAll('iframe');
+            iframes.forEach(iframe => {
+                if (iframe.contentWindow) {
+                    iframe.contentWindow.postMessage({type: 'enable-keyboard-debug'}, '*');
+                }
+            });
+        }
+        
+        function goToScene5() {
+            updateVideoStatus('跳转到镜头5...');
+            addLog('跳转到镜头5');
+            
+            const iframe = document.getElementById('story-frame');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({type: 'go-to-scene', scene: 5}, '*');
+            }
+        }
+        
+        function skipToPhase3() {
+            updateVideoStatus('跳转到镜头5阶段3...');
+            addLog('跳转到镜头5阶段3');
+            
+            const iframe = document.getElementById('scene5-frame');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({type: 'skip-to-phase', phase: 3}, '*');
+            }
+        }
+        
+        function testVideoTransition() {
+            updateVideoStatus('测试视频切换...');
+            addLog('开始测试视频切换');
+            
+            const iframe = document.getElementById('scene5-frame');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({type: 'test-video-transition'}, '*');
+            }
+        }
+        
+        function runAllTests() {
+            updateOverallStatus('运行所有测试...');
+            addLog('=== 开始全面测试 ===');
+            
+            // 依次运行所有测试
+            setTimeout(() => testKeyboard(), 500);
+            setTimeout(() => enableKeyboardDebug(), 1000);
+            setTimeout(() => goToScene5(), 1500);
+            setTimeout(() => skipToPhase3(), 2000);
+            
+            setTimeout(() => {
+                updateOverallStatus('所有测试已启动，请观察结果');
+                addLog('=== 所有测试已启动 ===');
+            }, 2500);
+        }
+        
+        function clearLog() {
+            logDiv.innerHTML = '';
+            addLog('日志已清空');
+        }
+        
+        // 监听来自iframe的消息
+        window.addEventListener('message', (event) => {
+            if (event.data.type) {
+                addLog(`收到消息: ${event.data.type}`);
+                
+                switch(event.data.type) {
+                    case 'console-toggle-result':
+                        updateKeyboardStatus(`控制台${event.data.visible ? '显示' : '隐藏'} - 快捷键正常工作!`);
+                        break;
+                    case 'video-loading':
+                        updateVideoStatus(`视频加载: ${event.data.message}`);
+                        break;
+                    case 'video-transition-start':
+                        updateVideoStatus('视频切换开始...');
+                        break;
+                    case 'video-transition-complete':
+                        updateVideoStatus('视频切换完成 - 无黑屏!');
+                        break;
+                    case 'scene5-phase-update':
+                        updateVideoStatus(`镜头5: ${event.data.phase}`);
+                        break;
+                }
+            }
+        });
+        
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', () => {
+            updateOverallStatus('测试环境已加载');
+            addLog('部署问题修复验证工具已启动');
+            
+            // 等待iframe加载
+            const storyFrame = document.getElementById('story-frame');
+            const scene5Frame = document.getElementById('scene5-frame');
+            
+            storyFrame.addEventListener('load', () => {
+                addLog('故事管理器页面加载完成');
+                updateKeyboardStatus('故事页面已加载，可以测试控制台快捷键');
+            });
+            
+            scene5Frame.addEventListener('load', () => {
+                addLog('镜头5页面加载完成');
+                updateVideoStatus('镜头5已加载，可以测试视频切换');
+            });
+        });
+        
+        // 快捷键支持
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case '1':
+                    testKeyboard();
+                    break;
+                case '2':
+                    goToScene5();
+                    break;
+                case '3':
+                    skipToPhase3();
+                    break;
+                case '4':
+                    testVideoTransition();
+                    break;
+                case '5':
+                    runAllTests();
+                    break;
+                case 'c':
+                case 'C':
+                    clearLog();
+                    break;
+                case 'd':
+                case 'D':
+                    enableKeyboardDebug();
+                    break;
+            }
+        });
+        
+        addLog('快捷键: 1=测试键盘, 2=镜头5, 3=阶段3, 4=视频切换, 5=全测试, C=清空, D=调试');
+    </script>
+</body>
+</html> 

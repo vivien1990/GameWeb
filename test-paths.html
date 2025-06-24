@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>路径测试</title>
+    <style>
+        body { background: #000; color: white; font-family: Arial, sans-serif; }
+        .test-item { margin: 20px; padding: 10px; border: 1px solid #333; }
+        img, video { max-width: 300px; max-height: 200px; display: block; margin: 10px 0; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>资源路径测试</h1>
+    
+    <div class="test-item">
+        <h3>视线模糊图片</h3>
+        <img src="镜头1/1/视线模糊.png" alt="视线模糊" onload="this.nextSibling.textContent='✅ 加载成功'" onerror="this.nextSibling.textContent='❌ 加载失败'">
+        <span class="status"></span>
+    </div>
+    
+    <div class="test-item">
+        <h3>视线清晰视频</h3>
+        <video src="镜头1/1/视线清晰.mp4" muted loop autoplay playsinline onloadeddata="this.nextSibling.textContent='✅ 加载成功'" onerror="this.nextSibling.textContent='❌ 加载失败'"></video>
+        <span class="status"></span>
+    </div>
+    
+    <div class="test-item">
+        <h3>左柜门图片</h3>
+        <img src="镜头1/1/柜门left.png" alt="左柜门" onload="this.nextSibling.textContent='✅ 加载成功'" onerror="this.nextSibling.textContent='❌ 加载失败'">
+        <span class="status"></span>
+    </div>
+    
+    <div class="test-item">
+        <h3>右柜门图片</h3>
+        <img src="镜头1/1/柜门right.png" alt="右柜门" onload="this.nextSibling.textContent='✅ 加载成功'" onerror="this.nextSibling.textContent='❌ 加载失败'">
+        <span class="status"></span>
+    </div>
+    
+    <div class="test-item">
+        <h3>惊恐视频</h3>
+        <video src="镜头1/2/惊恐.mp4" muted loop autoplay playsinline onloadeddata="this.nextSibling.textContent='✅ 加载成功'" onerror="this.nextSibling.textContent='❌ 加载失败'"></video>
+        <span class="status"></span>
+    </div>
+    
+    <div class="test-item">
+        <h3>人物图片</h3>
+        <img src="镜头1/3/人.png" alt="人物" onload="this.nextSibling.textContent='✅ 加载成功'" onerror="this.nextSibling.textContent='❌ 加载失败'">
+        <span class="status"></span>
+    </div>
+    
+    <div class="test-item">
+        <h3>门图片</h3>
+        <img src="镜头1/3/门.png" alt="门" onload="this.nextSibling.textContent='✅ 加载成功'" onerror="this.nextSibling.textContent='❌ 加载失败'">
+        <span class="status"></span>
+    </div>
+    
+    <div class="test-item">
+        <h3>音频文件测试</h3>
+        <audio src="sounds/heartbeat.mp3" onloadeddata="this.nextSibling.textContent='✅ 心跳音频加载成功'" onerror="this.nextSibling.textContent='❌ 心跳音频加载失败'"></audio>
+        <span class="status"></span><br>
+        <audio src="sounds/Rain.MP3" onloadeddata="this.nextSibling.textContent='✅ 雨声音频加载成功'" onerror="this.nextSibling.textContent='❌ 雨声音频加载失败'"></audio>
+        <span class="status"></span><br>
+        <audio src="sounds/knife.mp3" onloadeddata="this.nextSibling.textContent='✅ 刀砍音频加载成功'" onerror="this.nextSibling.textContent='❌ 刀砍音频加载失败'"></audio>
+        <span class="status"></span>
+    </div>
+    
+    <script>
+        // 等待所有资源加载完成后显示总结
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const statuses = document.querySelectorAll('.status');
+                let successCount = 0;
+                let totalCount = statuses.length;
+                
+                statuses.forEach(status => {
+                    if (status.textContent.includes('✅')) {
+                        successCount++;
+                    }
+                });
+                
+                const summary = document.createElement('div');
+                summary.style.cssText = 'position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.8); padding: 20px; border: 2px solid #333; border-radius: 10px;';
+                summary.innerHTML = `
+                    <h3>加载总结</h3>
+                    <p>成功: ${successCount}/${totalCount}</p>
+                    <p style="color: ${successCount === totalCount ? 'green' : 'orange'}">
+                        ${successCount === totalCount ? '所有资源加载成功！' : '部分资源加载失败'}
+                    </p>
+                `;
+                document.body.appendChild(summary);
+            }, 2000);
+        });
+    </script>
+</body>
+</html> 

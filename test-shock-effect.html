@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>震撼效果测试 - 惊吓版</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .test-video {
+            width: 80%;
+            height: 60%;
+            background: linear-gradient(45deg, #333, #666);
+            border: 2px solid #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 10000;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            background: #ff6600;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background: #ff8833;
+        }
+
+        .info {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 400px;
+        }
+
+        /* 加强版惊吓式震撼效果 */
+        @keyframes shockTest {
+            /* 蓄力阶段：营造压迫感，更缓慢 */
+            0% { 
+                transform: scale(0.3) rotate(0deg);
+                filter: brightness(0.05) contrast(0.2) blur(8px) saturate(0.1);
+            }
+            8% { 
+                transform: scale(0.4) rotate(-1deg);
+                filter: brightness(0.1) contrast(0.3) blur(6px) saturate(0.2);
+            }
+            /* 爆发阶段：更极端的变化 */
+            20% { 
+                transform: scale(15) rotate(-10deg);
+                filter: brightness(8.0) contrast(5.0) blur(0px) saturate(4.0);
+            }
+            /* 强冲击阶段，保持更久 */
+            40% { 
+                transform: scale(5) rotate(8deg);
+                filter: brightness(4.0) contrast(4.0) blur(0px) saturate(3.0);
+            }
+            60% { 
+                transform: scale(2.5) rotate(-3deg);
+                filter: brightness(2.5) contrast(2.5) blur(0px) saturate(2.0);
+            }
+            /* 稳定过渡，更明显 */
+            80% { 
+                transform: scale(1.3) rotate(1deg);
+                filter: brightness(1.5) contrast(1.8) blur(0px) saturate(1.3);
+            }
+            /* 恢复正常 */
+            100% { 
+                transform: scale(1) rotate(0deg);
+                filter: brightness(1) contrast(1) blur(0px) saturate(1);
+            }
+        }
+
+        @keyframes bodyShakeTest {
+            /* 配合蓄力阶段 - 轻微不安感 */
+            0% { transform: translateX(0) translateY(0); }
+            4% { transform: translateX(-1px) translateY(-1px); }
+            8% { transform: translateX(1px) translateY(1px); }
+            12% { transform: translateX(-2px) translateY(1px); }
+            16% { transform: translateX(2px) translateY(-1px); }
+            /* 爆发阶段 - 强烈但可控的震动 */
+            20% { transform: translateX(-8px) translateY(-6px); }
+            22% { transform: translateX(8px) translateY(6px); }
+            24% { transform: translateX(-7px) translateY(5px); }
+            26% { transform: translateX(7px) translateY(-5px); }
+            28% { transform: translateX(-6px) translateY(-4px); }
+            30% { transform: translateX(6px) translateY(4px); }
+            32% { transform: translateX(-5px) translateY(3px); }
+            34% { transform: translateX(5px) translateY(-3px); }
+            36% { transform: translateX(-4px) translateY(-2px); }
+            38% { transform: translateX(4px) translateY(2px); }
+            /* 强震阶段 - 密集震动 */
+            40% { transform: translateX(-6px) translateY(-4px); }
+            42% { transform: translateX(6px) translateY(4px); }
+            44% { transform: translateX(-5px) translateY(3px); }
+            46% { transform: translateX(5px) translateY(-3px); }
+            48% { transform: translateX(-4px) translateY(-2px); }
+            50% { transform: translateX(4px) translateY(2px); }
+            52% { transform: translateX(-3px) translateY(1px); }
+            54% { transform: translateX(3px) translateY(-1px); }
+            56% { transform: translateX(-2px) translateY(-1px); }
+            58% { transform: translateX(2px) translateY(1px); }
+            60% { transform: translateX(-1px) translateY(0px); }
+            /* 逐渐平息 - 精细控制 */
+            65% { transform: translateX(1px) translateY(-1px); }
+            70% { transform: translateX(-1px) translateY(1px); }
+            75% { transform: translateX(1px) translateY(0px); }
+            80% { transform: translateX(-1px) translateY(0px); }
+            85% { transform: translateX(0px) translateY(-1px); }
+            90% { transform: translateX(0px) translateY(1px); }
+            95% { transform: translateX(0px) translateY(0px); }
+            100% { transform: translateX(0) translateY(0); }
+        }
+
+        .shock-effect {
+            animation: shockTest 0.6s ease-out;
+        }
+
+        .body-shake {
+            animation: bodyShakeTest 0.6s ease-out;
+        }
+
+        /* 旧版本对比 */
+        @keyframes oldShock {
+            0% { 
+                transform: scale(4) rotate(0deg);
+                filter: brightness(0.1) contrast(0.8);
+            }
+            60% { 
+                transform: scale(2) rotate(0deg);
+                filter: brightness(1.8) contrast(2.5);
+            }
+            100% { 
+                transform: scale(1) rotate(0deg);
+                filter: brightness(1) contrast(1);
+            }
+        }
+
+        .old-shock {
+            animation: oldShock 0.5s ease-in-out;
+        }
+        
+        /* 脉冲动画 */
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="test-video" id="testVideo">
+            测试视频区域
+        </div>
+    </div>
+
+    <div class="controls">
+        <button onclick="testNewShock()">🚀 优化版震撼效果 (0.6s)</button>
+        <button onclick="testOldShock()">📺 旧版震撼对比 (0.5s)</button>
+        <button onclick="reset()">🔄 重置</button>
+    </div>
+
+    <div class="info">
+        <h3>🎬 震撼效果测试</h3>
+        <p><strong>加强版特点：</strong></p>
+        <ul>
+            <li>0%: 蓄力缩小(0.3倍) + 极度模糊暗淡</li>
+            <li>8%: 继续蓄力(0.4倍) + 模糊减弱</li>
+            <li>20%: 爆发放大(15倍!) + 超强闪光</li>
+            <li>40%: 强冲击(5倍) + 极高亮度</li>
+            <li>60%: 持续冲击(2.5倍) + 高亮度</li>
+            <li>80%: 稳定过渡(1.3倍) + 明显效果</li>
+            <li>100%: 恢复正常</li>
+        </ul>
+        <p><strong>时长：</strong> 0.6秒 (更持久可见)</p>
+        <p id="status">点击按钮测试效果</p>
+    </div>
+
+    <script>
+        let isAnimating = false;
+
+        function testNewShock() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const video = document.getElementById('testVideo');
+            const body = document.body;
+            
+            // 更新状态
+            document.getElementById('status').textContent = '🚀 执行优化版震撼效果 (0.6秒) - 震动已优化';
+            
+            // 添加震撼效果
+            video.classList.add('shock-effect');
+            body.classList.add('body-shake');
+            
+            // 添加震撼效果指示器
+            const shockIndicator = document.createElement('div');
+            shockIndicator.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(255, 0, 0, 0.95);
+                color: white;
+                padding: 20px 40px;
+                border-radius: 10px;
+                font-size: 24px;
+                font-weight: bold;
+                z-index: 10001;
+                box-shadow: 0 0 30px rgba(255, 0, 0, 0.8);
+                animation: pulse 0.15s infinite alternate;
+                border: 3px solid rgba(255, 255, 255, 0.8);
+            `;
+            shockIndicator.textContent = '🚨 震撼效果进行中 🚨';
+            document.body.appendChild(shockIndicator);
+            
+            // 添加闪光效果
+            createFlashEffect();
+            
+            // 设备震动
+            if (navigator.vibrate) {
+                navigator.vibrate([50, 30, 200, 50, 200, 50, 100]);
+            }
+            
+            setTimeout(() => {
+                video.classList.remove('shock-effect');
+                body.classList.remove('body-shake');
+                
+                // 移除震撼效果指示器
+                const indicator = document.querySelector('div[style*="震撼效果进行中"]');
+                if (indicator) {
+                    indicator.remove();
+                }
+                
+                document.getElementById('status').textContent = '✅ 优化版震撼效果完成！画面震动已修正';
+                isAnimating = false;
+            }, 600);
+        }
+
+        function testOldShock() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const video = document.getElementById('testVideo');
+            
+            document.getElementById('status').textContent = '📺 执行旧版震撼效果 (0.5秒)';
+            
+            video.classList.add('old-shock');
+            
+            setTimeout(() => {
+                video.classList.remove('old-shock');
+                document.getElementById('status').textContent = '✅ 旧版震撼效果完成';
+                isAnimating = false;
+            }, 500);
+        }
+
+        function createFlashEffect() {
+            const flash = document.createElement('div');
+            flash.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.5) 20%, rgba(255,255,255,0.2) 40%, transparent 70%);
+                z-index: 9998;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.1s ease-out;
+            `;
+            document.body.appendChild(flash);
+            
+            setTimeout(() => flash.style.opacity = '1', 50);
+            setTimeout(() => flash.style.opacity = '0', 150);
+            setTimeout(() => flash.remove(), 300);
+        }
+
+        function reset() {
+            const video = document.getElementById('testVideo');
+            const body = document.body;
+            
+            video.classList.remove('shock-effect', 'old-shock');
+            body.classList.remove('body-shake');
+            
+            document.getElementById('status').textContent = '🔄 已重置，可以重新测试';
+            isAnimating = false;
+        }
+
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case '1':
+                    testNewShock();
+                    break;
+                case '2':
+                    testOldShock();
+                    break;
+                case 'r':
+                case 'R':
+                    reset();
+                    break;
+            }
+        });
+
+        console.log('🎬 震撼效果测试页面已加载');
+        console.log('🎮 快捷键: 1=新版震撼, 2=旧版对比, R=重置');
+    </script>
+</body>
+</html> 

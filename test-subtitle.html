@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>字幕测试页面</title>
+    <style>
+        .hidden {
+            display: none !important;
+        }
+        
+        body {
+            background: #000;
+            color: white;
+            font-family: 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        /* 字幕样式 - 对话泡泡底框 */
+        .subtitle {
+            position: fixed;
+            bottom: 120px;
+            left: 50%;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 1000;
+            max-width: 500px;
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+            transition: all 0.5s ease;
+            font-family: 'Microsoft YaHei', sans-serif;
+            /* 对话泡泡底框样式 */
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            padding: 15px 25px;
+            box-shadow: 
+                0 8px 25px rgba(0, 0, 0, 0.4),
+                0 4px 15px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+        
+        .subtitle.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .subtitle::before {
+            content: '💭';
+            margin-right: 10px;
+            font-size: 22px;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+        }
+        
+        /* 对话泡泡底部小尖角 */
+        .subtitle::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 12px solid rgba(0, 0, 0, 0.85);
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+        
+        .control-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .control-button:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <h1>字幕显示测试</h1>
+    
+    <div style="margin: 20px 0;">
+        <button class="control-button" onclick="showSubtitle()">显示字幕</button>
+        <button class="control-button" onclick="hideSubtitle()">隐藏字幕</button>
+        <button class="control-button" onclick="toggleSubtitle()">切换字幕</button>
+        <button class="control-button" onclick="checkElement()">检查元素</button>
+    </div>
+    
+    <div id="debug" style="background: #333; padding: 10px; margin: 10px 0; border-radius: 5px;"></div>
+    
+    <!-- 字幕元素 -->
+    <div id="subtitle" class="subtitle hidden"></div>
+    
+    <script>
+        function log(message) {
+            const debug = document.getElementById('debug');
+            debug.innerHTML += new Date().toLocaleTimeString() + ': ' + message + '<br>';
+            console.log(message);
+        }
+        
+        function showSubtitle() {
+            const subtitleElement = document.getElementById('subtitle');
+            subtitleElement.textContent = '这玉佩....能吸收星光？';
+            subtitleElement.classList.remove('hidden');
+            subtitleElement.classList.add('show');
+            log('显示字幕');
+        }
+        
+        function hideSubtitle() {
+            const subtitleElement = document.getElementById('subtitle');
+            subtitleElement.classList.add('hidden');
+            subtitleElement.classList.remove('show');
+            log('隐藏字幕');
+        }
+        
+        function toggleSubtitle() {
+            const subtitleElement = document.getElementById('subtitle');
+            if (subtitleElement.classList.contains('show')) {
+                hideSubtitle();
+            } else {
+                showSubtitle();
+            }
+        }
+        
+        function checkElement() {
+            const subtitleElement = document.getElementById('subtitle');
+            const computedStyle = window.getComputedStyle(subtitleElement);
+            
+            log(`元素存在: ${subtitleElement ? '是' : '否'}`);
+            log(`类名: ${subtitleElement.className}`);
+            log(`文本内容: "${subtitleElement.textContent}"`);
+            log(`display: ${computedStyle.display}`);
+            log(`opacity: ${computedStyle.opacity}`);
+            log(`transform: ${computedStyle.transform}`);
+            log(`z-index: ${computedStyle.zIndex}`);
+        }
+        
+        // 页面加载后自动检查
+        window.addEventListener('DOMContentLoaded', () => {
+            log('页面加载完成');
+            checkElement();
+        });
+    </script>
+</body>
+</html> 

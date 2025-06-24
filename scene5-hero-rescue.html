@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镜头5：英雄救美选择 - 代号qin</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(180deg, #2C1810 0%, #1A0F08 50%, #000000 100%);
+            overflow: hidden;
+            font-family: 'Microsoft YaHei', sans-serif;
+            cursor: default;
+        }
+        
+        #scene5-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* 场景背景 */
+        .scene-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(139, 69, 19, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(160, 82, 45, 0.2) 0%, transparent 50%);
+            z-index: 1;
+        }
+        
+        /* 角色容器 */
+        .characters-container {
+            position: absolute;
+            bottom: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            z-index: 10;
+        }
+        
+        /* 欺凌者们 */
+        .bullies {
+            position: absolute;
+            left: 20%;
+            bottom: 0;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .bully {
+            width: 60px;
+            height: 100px;
+            background: linear-gradient(180deg, #8B4513 0%, #654321 50%, #3C2414 100%);
+            border-radius: 30px 30px 15px 15px;
+            position: relative;
+            animation: bullyThreat 2s ease-in-out infinite;
+        }
+        
+        .bully:nth-child(2) { animation-delay: 0.5s; }
+        .bully:nth-child(3) { animation-delay: 1s; }
+        
+        @keyframes bullyThreat {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-5px) rotate(2deg); }
+        }
+        
+        .bully::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: #D2691E;
+            border-radius: 50%;
+        }
+        
+        /* 小嬴政 */
+        .young-yingzheng {
+            position: absolute;
+            right: 40%;
+            bottom: 0;
+            width: 50px;
+            height: 80px;
+            background: linear-gradient(180deg, #708090 0%, #2F4F4F 50%, #1C1C1C 100%);
+            border-radius: 25px 25px 12px 12px;
+            animation: victimCower 3s ease-in-out infinite;
+            transition: all 0.5s ease;
+        }
+        
+        @keyframes victimCower {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(5px) scale(0.95); }
+        }
+        
+        .young-yingzheng::before {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 16px;
+            background: #F5DEB3;
+            border-radius: 50%;
+        }
+        
+        /* 玩家角色 */
+        .player-character {
+            position: absolute;
+            left: 80%;
+            bottom: 0;
+            width: 60px;
+            height: 100px;
+            background: linear-gradient(180deg, #4682B4 0%, #2F4F4F 50%, #191970 100%);
+            border-radius: 30px 30px 15px 15px;
+            opacity: 0;
+            transform: translateX(100px);
+            animation: playerEntrance 2s ease-out 1s forwards;
+        }
+        
+        @keyframes playerEntrance {
+            0% { opacity: 0; transform: translateX(100px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        
+        .player-character::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: #F0E68C;
+            border-radius: 50%;
+        }
+        
+        /* 场景描述文字 */
+        .scene-description {
+            position: absolute;
+            top: 10%;
+            left: 5%;
+            right: 5%;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            line-height: 1.8;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #FFD700;
+            opacity: 0;
+            animation: descriptionSlideIn 2s ease-out forwards;
+        }
+        
+        @keyframes descriptionSlideIn {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 选择面板 */
+        .choice-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            padding: 30px;
+            border-radius: 15px;
+            color: white;
+            min-width: 500px;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.8);
+            transition: all 0.5s ease;
+            z-index: 1000;
+        }
+        
+        .choice-panel.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        /* 倒计时器 */
+        .choice-timer {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .timer-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4444, #ff8844);
+            width: 100%;
+            transition: width 0.1s linear;
+        }
+        
+        .timer-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff4444;
+        }
+        
+        /* 选择按钮容器 */
+        .choices-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .choice-btn {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .choice-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: #4CAF50;
+            transform: translateY(-2px);
+        }
+        
+        .choice-btn.martial {
+            border-color: #f44336;
+        }
+        
+        .choice-btn.martial:hover {
+            background: rgba(244, 67, 54, 0.2);
+            border-color: #FFD700;
+        }
+        
+        .choice-btn.cunning {
+            border-color: #2196F3;
+        }
+        
+        .choice-btn.cunning:hover {
+            background: rgba(33, 150, 243, 0.2);
+            border-color: #FFD700;
+        }
+        
+        .choice-btn.virtue {
+            border-color: #FF9800;
+        }
+        
+        .choice-btn.virtue:hover {
+            background: rgba(255, 152, 0, 0.2);
+            border-color: #FFD700;
+        }
+        
+        .choice-icon {
+            font-size: 24px;
+            margin-right: 15px;
+        }
+        
+        .choice-text {
+            flex: 1;
+            font-weight: bold;
+        }
+        
+        .choice-preview {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        
+        /* 时间减缓效果 */
+        .conflict-scene.slow-motion {
+            filter: blur(1px) brightness(0.7);
+        }
+        
+        .conflict-scene.slow-motion .characters-container {
+            animation: slowMotion 0.5s ease-out forwards;
+        }
+        
+        @keyframes slowMotion {
+            0% { filter: none; }
+            100% { filter: blur(0.5px) brightness(0.8); }
+        }
+        
+        /* 选择结果反馈 */
+        .choice-result {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #FFD700;
+            text-align: center;
+            z-index: 99999;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.8);
+            transition: all 0.5s ease;
+        }
+        
+        .choice-result.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .result-title {
+            font-size: 20px;
+            color: #FFD700;
+            margin-bottom: 15px;
+        }
+        
+        .result-description {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .result-effects {
+            font-size: 12px;
+            color: #90EE90;
+            margin-bottom: 20px;
+        }
+        
+        /* 控制面板 */
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            z-index: 10000;
+            min-width: 200px;
+            border: 1px solid #333;
+        }
+        
+        .control-button {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #666;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: background 0.3s;
+        }
+        
+        .control-button:hover {
+            background: #555;
+        }
+        
+        .status {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #666;
+            font-size: 10px;
+            opacity: 0.8;
+        }
+        
+        /* 动画效果 */
+        @keyframes charging {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-200px); }
+        }
+        
+        @keyframes being-hit {
+            0% { transform: translateX(0) rotate(0deg); }
+            50% { transform: translateX(20px) rotate(10deg); }
+            100% { transform: translateX(0) rotate(0deg); opacity: 0.5; }
+        }
+        
+        @keyframes approaching {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100px); }
+        }
+        
+        @keyframes confused {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+            100% { transform: rotate(0deg); }
+        }
+        
+        @keyframes calling-help {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* 对话气泡 */
+        .dialogue-bubble {
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 15px;
+            border: 2px solid #FFD700;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            animation: bubbleFadeIn 0.5s ease-out forwards;
+        }
+        
+        .dialogue-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #FFD700;
+        }
+        
+        @keyframes bubbleFadeIn {
+            0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+            100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div id="scene5-container" class="conflict-scene">
+        <!-- 场景背景 -->
+        <div class="scene-background"></div>
+        
+        <!-- 场景描述 -->
+        <div class="scene-description" id="scene-description">
+            <p style="font-weight: bold; color: #FFD700;">远处传来一阵打骂声...</p>
+            <p>x循声走去，看到几个衣着华贵的少年正围着一个瘦小的男孩拳打脚踢。</p>
+            <p style="color: #E74C3C;">"秦狗！你也配和我们一起读书？"</p>
+            <p style="color: #E74C3C;">"你爹不要你了，把你扔在这儿等死！"</p>
+            <p>被殴打的男孩死死护住头部，一声不吭。当其中一个少年举起石头要砸他时...</p>
+        </div>
+        
+        <!-- 角色容器 -->
+        <div class="characters-container">
+            <!-- 欺凌者们 -->
+            <div class="bullies" id="bullies">
+                <div class="bully"></div>
+                <div class="bully"></div>
+                <div class="bully"></div>
+            </div>
+            
+            <!-- 小嬴政 -->
+            <div class="young-yingzheng" id="young-yingzheng"></div>
+            
+            <!-- 玩家角色 -->
+            <div class="player-character" id="player-character"></div>
+        </div>
+        
+        <!-- 选择面板 -->
+        <div class="choice-panel" id="choice-panel">
+            <div class="choice-timer">
+                <div class="timer-bar">
+                    <div class="timer-fill" id="timer-fill"></div>
+                </div>
+                <span class="timer-text" id="timer-text">5</span>
+            </div>
+            
+            <div class="choices-container">
+                <button class="choice-btn martial" data-choice="fight">
+                    <div class="choice-icon">⚔️</div>
+                    <div class="choice-text">直接冲上去</div>
+                    <div class="choice-preview">武德+15，可能受伤</div>
+                </button>
+                
+                <button class="choice-btn cunning" data-choice="persuade">
+                    <div class="choice-icon">💬</div>
+                    <div class="choice-text">智慧劝说</div>
+                    <div class="choice-preview">巧思+10，和平解决</div>
+                </button>
+                
+                <button class="choice-btn virtue" data-choice="help">
+                    <div class="choice-icon">🤝</div>
+                    <div class="choice-text">寻求帮助</div>
+                    <div class="choice-preview">仁德+8，获得盟友</div>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 选择结果 -->
+        <div class="choice-result" id="choice-result">
+            <div class="result-title" id="result-title">选择结果</div>
+            <div class="result-description" id="result-description">描述内容</div>
+            <div class="result-effects" id="result-effects">属性影响</div>
+            <button onclick="continueStory()" 
+                    style="padding: 10px 20px; background: #FFD700; color: #000; border: none; border-radius: 5px; cursor: pointer;">
+                继续故事
+            </button>
+        </div>
+        
+        <!-- 控制面板 -->
+        <div class="controls">
+            <h4 style="margin: 0 0 10px 0; color: #FFD700;">镜头5：英雄救美选择</h4>
+            <button class="control-button" onclick="startScene()">开始场景</button>
+            <button class="control-button" onclick="showAllChoices()">显示选择面板</button>
+            <button class="control-button" onclick="autoChoice()">自动选择</button>
+            <button class="control-button" onclick="nextScene()">下一镜头</button>
+            <button class="control-button" onclick="restartScene()">重新开始</button>
+            
+            <div class="status">
+                <div>状态: <span id="scene-status">场景初始化</span></div>
+                <div>选择: <span id="choice-made">未选择</span></div>
+                <div>属性影响: <span id="attribute-effect">无</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class Scene5Controller {
+            constructor() {
+                this.container = document.getElementById('scene5-container');
+                this.sceneDescription = document.getElementById('scene-description');
+                this.choicePanel = document.getElementById('choice-panel');
+                this.choiceResult = document.getElementById('choice-result');
+                this.status = document.getElementById('scene-status');
+                this.choiceMade = document.getElementById('choice-made');
+                this.attributeEffect = document.getElementById('attribute-effect');
+                
+                this.currentPhase = 1;
+                this.selectedChoice = null;
+                this.timerDuration = 5000; // 5秒选择时间
+                this.timerInterval = null;
+                
+                this.choices = {
+                    fight: {
+                        name: '直接冲上去',
+                        attribute: 'martial',
+                        value: 15,
+                        animation: 'fight-sequence',
+                        consequence: '可能受伤但展现勇气'
+                    },
+                    persuade: {
+                        name: '智慧劝说',
+                        attribute: 'cunning', 
+                        value: 10,
+                        animation: 'persuade-sequence',
+                        consequence: '和平解决获得尊重'
+                    },
+                    help: {
+                        name: '寻求帮助',
+                        attribute: 'virtue',
+                        value: 8,
+                        animation: 'help-sequence',
+                        consequence: '获得盟友支持'
+                    }
+                };
+                
+                this.init();
+            }
+            
+            init() {
+                console.log('🎬 镜头5：英雄救美选择初始化');
+                this.updateStatus('场景展开中...');
+                this.startConflictScene();
+                this.bindChoiceEvents();
+            }
+            
+            // 启动冲突场景
+            startConflictScene() {
+                this.currentPhase = 1;
+                
+                // 播放冲突建立动画
+                this.playConflictAnimation();
+                
+                // 6秒后显示选择界面
+                setTimeout(() => {
+                    this.showChoicePanel();
+                }, 6000);
+            }
+            
+            // 播放冲突动画
+            playConflictAnimation() {
+                const bullies = document.querySelectorAll('.bully');
+                const victim = document.querySelector('.young-yingzheng');
+                
+                // 恶霸攻击动画
+                bullies.forEach((bully, index) => {
+                    setTimeout(() => {
+                        bully.classList.add('attacking');
+                    }, index * 500);
+                });
+                
+                // 受害者受伤动画
+                setTimeout(() => {
+                    victim.classList.add('being-hurt');
+                }, 1000);
+                
+                // 主角注意到冲突
+                setTimeout(() => {
+                    document.querySelector('.player-character').classList.add('alert');
+                }, 3000);
+            }
+            
+            // 显示选择面板
+            showChoicePanel() {
+                this.currentPhase = 2;
+                
+                // 时间减缓效果
+                this.container.classList.add('slow-motion');
+                
+                // 显示选择面板
+                this.choicePanel.classList.add('show');
+                
+                // 启动倒计时
+                this.startChoiceTimer();
+                
+                this.updateStatus('关键选择时刻');
+            }
+            
+            // 启动选择倒计时
+            startChoiceTimer() {
+                let timeLeft = this.timerDuration;
+                const timerFill = document.getElementById('timer-fill');
+                const timerText = document.getElementById('timer-text');
+                
+                this.timerInterval = setInterval(() => {
+                    timeLeft -= 100;
+                    const progress = (timeLeft / this.timerDuration) * 100;
+                    
+                    timerFill.style.width = progress + '%';
+                    timerText.textContent = Math.ceil(timeLeft / 1000);
+                    
+                    if (timeLeft <= 0) {
+                        // 时间到，自动选择第一个选项
+                        this.makeChoice('fight');
+                    }
+                }, 100);
+            }
+            
+            // 绑定选择事件
+            bindChoiceEvents() {
+                const choiceBtns = document.querySelectorAll('.choice-btn');
+                
+                choiceBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const choice = btn.dataset.choice;
+                        this.makeChoice(choice);
+                    });
+                });
+            }
+            
+            // 执行选择
+            makeChoice(choiceKey) {
+                if (this.selectedChoice) return; // 防止重复选择
+                
+                this.selectedChoice = choiceKey;
+                this.currentPhase = 3;
+                
+                // 清除倒计时
+                clearInterval(this.timerInterval);
+                
+                // 隐藏选择面板
+                this.choicePanel.classList.remove('show');
+                
+                // 恢复正常时间
+                this.container.classList.remove('slow-motion');
+                
+                // 播放对应动画
+                this.playActionSequence(choiceKey);
+            }
+            
+            // 播放行动序列
+            playActionSequence(choiceKey) {
+                const choice = this.choices[choiceKey];
+                
+                // 根据选择播放不同动画
+                switch(choiceKey) {
+                    case 'fight':
+                        this.playFightSequence();
+                        break;
+                    case 'persuade':
+                        this.playPersuadeSequence();
+                        break;
+                    case 'help':
+                        this.playHelpSequence();
+                        break;
+                }
+                
+                // 3秒后显示结果
+                setTimeout(() => {
+                    this.showResult(choice);
+                }, 3000);
+            }
+            
+            // 战斗序列动画
+            playFightSequence() {
+                const protagonist = document.querySelector('.player-character');
+                const bullies = document.querySelectorAll('.bully');
+                
+                // 主角冲刺
+                protagonist.style.animation = 'charging 1s ease-out forwards';
+                
+                // 战斗特效
+                setTimeout(() => {
+                    bullies.forEach(bully => {
+                        bully.style.animation = 'being-hit 0.5s ease-out forwards';
+                    });
+                }, 1000);
+            }
+            
+            // 劝说序列动画
+            playPersuadeSequence() {
+                const protagonist = document.querySelector('.player-character');
+                
+                // 主角走向前
+                protagonist.style.animation = 'approaching 1s ease-out forwards';
+                
+                // 显示对话气泡
+                setTimeout(() => {
+                    this.showDialogue('住手！你们这样做是不对的！');
+                }, 1000);
+                
+                // 恶霸们停止攻击
+                setTimeout(() => {
+                    document.querySelectorAll('.bully').forEach(bully => {
+                        bully.style.animation = 'confused 1s ease-out forwards';
+                    });
+                }, 2000);
+            }
+            
+            // 寻求帮助序列
+            playHelpSequence() {
+                const protagonist = document.querySelector('.player-character');
+                
+                // 主角呼救
+                protagonist.style.animation = 'calling-help 1s ease-out forwards';
+                
+                // 显示呼救对话
+                setTimeout(() => {
+                    this.showDialogue('来人啊！有人在这里欺负人！');
+                }, 500);
+            }
+            
+            // 显示对话
+            showDialogue(text) {
+                const bubble = document.createElement('div');
+                bubble.className = 'dialogue-bubble';
+                bubble.textContent = text;
+                bubble.style.top = '-80px';
+                bubble.style.fontSize = '14px';
+                bubble.style.borderColor = '#87CEEB';
+                document.querySelector('.player-character').appendChild(bubble);
+            }
+            
+            // 显示最终结果
+            showResult(choice) {
+                this.currentPhase = 4;
+                
+                let result = {};
+                
+                switch(choice.attribute) {
+                    case 'martial':
+                        result = {
+                            title: '🗡️ 英勇战斗',
+                            description: 'x不知哪来的勇气冲了出去。"住手！"x的声音大得吓人，连他自己都吃了一惊。更惊人的是，x随手一推，那个比他高大半头的贵族少年竟然飞出去三米远！',
+                            effects: `武德 +${choice.value}，获得战斗经验`
+                        };
+                        break;
+                    case 'cunning':
+                        result = {
+                            title: '💬 智慧劝说',
+                            description: 'x冷静地分析形势，用智慧化解了冲突。通过巧妙的言辞和策略，成功让恶霸们停止了暴行，展现了过人的机智。',
+                            effects: `巧思 +${choice.value}，获得策略经验`
+                        };
+                        break;
+                    case 'virtue':
+                        result = {
+                            title: '🤝 寻求帮助',
+                            description: 'x明智地选择寻求帮助，通过呼救引来了路人的注意。这种做法虽然看似被动，但体现了仁者的智慧和对他人的信任。',
+                            effects: `仁德 +${choice.value}，获得外交经验`
+                        };
+                        break;
+                }
+                
+                // 显示结果
+                document.getElementById('result-title').textContent = result.title;
+                document.getElementById('result-description').textContent = result.description;
+                document.getElementById('result-effects').textContent = result.effects;
+                
+                this.choiceResult.classList.add('show');
+                this.updateStatus('选择完成');
+                
+                // 更新属性效果显示
+                this.attributeEffect.textContent = `${this.getAttributeName(choice.attribute)}+${choice.value}`;
+                this.choiceMade.textContent = choice.name;
+            }
+            
+            // 获取属性中文名
+            getAttributeName(attr) {
+                const names = {
+                    martial: '武德',
+                    cunning: '巧思',
+                    virtue: '仁德'
+                };
+                return names[attr];
+            }
+            
+            updateStatus(status) {
+                this.status.textContent = status;
+            }
+        }
+        
+        // 全局函数供控制面板使用
+        let scene5Instance;
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            scene5Instance = new Scene5Controller();
+        });
+        
+        function makeChoice(choice) {
+            scene5Instance.makeChoice(choice);
+        }
+        
+        function continueStory() {
+            scene5Instance.choiceResult.classList.remove('show');
+            nextScene();
+        }
+        
+        function startScene() {
+            console.log('🎬 重新开始场景');
+            scene5Instance.startConflictScene();
+        }
+        
+        function showAllChoices() {
+            console.log('📋 显示选择面板');
+            scene5Instance.showChoicePanel();
+        }
+        
+        function autoChoice() {
+            console.log('🤖 自动选择（英勇战斗）');
+            scene5Instance.makeChoice('fight');
+        }
+        
+        function nextScene() {
+            console.log('➡️ 前往下一镜头');
+            if (!scene5Instance.selectedChoice) {
+                alert('请先做出选择！');
+                return;
+            }
+            
+            const choiceMap = {
+                fight: '镜头6：首战告捷',
+                persuade: '镜头6：智慧胜利',
+                help: '镜头6：盟友相助'
+            };
+            
+            const nextSceneTitle = choiceMap[scene5Instance.selectedChoice] || '下一镜头';
+            alert(`镜头5完成！\n\n选择结果：${scene5Instance.choices[scene5Instance.selectedChoice].name}\n属性获得：${scene5Instance.attributeEffect.textContent}\n\n接下来将进入${nextSceneTitle}`);
+            
+            // 可以在这里跳转到下一个镜头
+            // window.location.href = 'scene6-first-battle.html';
+        }
+        
+        function restartScene() {
+            console.log('🔄 重新开始镜头5');
+            location.reload();
+        }
+        
+        // 快捷键支持
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case '1':
+                    makeChoice('fight');
+                    break;
+                case '2':
+                    makeChoice('persuade');
+                    break;
+                case '3':
+                    makeChoice('help');
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    showAllChoices();
+                    break;
+                case 'Enter':
+                    e.preventDefault();
+                    autoChoice();
+                    break;
+                case 'n':
+                case 'N':
+                    nextScene();
+                    break;
+                case 'r':
+                case 'R':
+                    restartScene();
+                    break;
+            }
+        });
+        
+        console.log('🎮 镜头5控制：1=直接冲上去, 2=智慧劝说, 3=寻求帮助, 空格=显示选择, 回车=自动选择, N=下一镜头, R=重启');
+    </script>
+</body>
+</html> 

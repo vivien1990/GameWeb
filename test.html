@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>门板重叠测试</title>
+    <style>
+        body { margin: 0; padding: 20px; background: #000; color: #fff; font-family: Arial; }
+        .test-container { 
+            width: 800px; 
+            height: 400px; 
+            position: relative; 
+            background: #333; 
+            margin: 20px auto;
+            border: 2px solid #666;
+        }
+        .left-door {
+            width: 51%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: linear-gradient(90deg, #8B4513, #A0522D);
+            z-index: 4;
+            border-right: 2px solid #654321;
+            transform: translateX(calc(49.5% - 1px));
+        }
+        .right-door {
+            width: 51%;
+            height: 100%;
+            position: absolute;
+            right: 0;
+            top: 0;
+            background: linear-gradient(90deg, #A0522D, #8B4513);
+            z-index: 3;
+            border-left: 2px solid #654321;
+            transform: translateX(calc(-49.5% + 1px));
+        }
+        .test-open .left-door {
+            transform: translateX(calc(50% - 4px));
+        }
+        .test-open .right-door {
+            transform: translateX(calc(-50% + 4px));
+        }
+        .info { margin: 20px auto; max-width: 800px; }
+        button { padding: 10px 20px; margin: 10px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h1>门板重叠测试</h1>
+    
+    <div class="info">
+        <h3>状态1：几乎完全闭合（2px缝隙）</h3>
+    </div>
+    <div class="test-container" id="test1">
+        <div class="left-door"></div>
+        <div class="right-door"></div>
+    </div>
+    
+    <div class="info">
+        <h3>状态2：稍微打开（8px缝隙）</h3>
+    </div>
+    <div class="test-container test-open" id="test2">
+        <div class="left-door"></div>
+        <div class="right-door"></div>
+    </div>
+    
+    <div class="info">
+        <button onclick="toggleDoors()">切换门板状态</button>
+        <p>左门板：width 51%, translateX(calc(50% - 1px)) 或 calc(50% - 5px)</p>
+        <p>右门板：width 51%, translateX(calc(-50% + 1px)) 或 calc(-50% + 5px)</p>
+    </div>
+    
+    <script>
+        function toggleDoors() {
+            const test1 = document.getElementById('test1');
+            test1.classList.toggle('test-open');
+        }
+    </script>
+</body>
+</html>
