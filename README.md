@@ -306,7 +306,7 @@ sounds: {
 ## 🎯 快速开始
 
 1. **启动服务器**：`python -m http.server 8000`
-2. **访问完整故事**：http://localhost:8000/index-story.html
+2. **访问完整故事**：http://localhost:8000/GameWeb/index.html
 3. **体验流程**：镜头1完成后自动切换到镜头2
 4. **控制选项**：使用右上角控制面板或快捷键
 
