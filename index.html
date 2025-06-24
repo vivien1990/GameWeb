@@ -3,55 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>正在跳转到首页...</title>
+    <title>游戏加载中...</title>
     <style>
         body {
             margin: 0;
             padding: 0;
             background: #000;
             color: #fff;
-            font-family: 'Microsoft YaHei', sans-serif;
+            font-family: Arial, sans-serif;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             height: 100vh;
-            text-align: center;
+            flex-direction: column;
         }
         .loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
+            text-align: center;
         }
         .spinner {
+            border: 2px solid #333;
+            border-top: 2px solid #fff;
+            border-radius: 50%;
             width: 40px;
             height: 40px;
-            border: 3px solid #333;
-            border-top: 3px solid #ffb100;
-            border-radius: 50%;
             animation: spin 1s linear infinite;
+            margin: 20px auto;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .redirect-text {
-            font-size: 18px;
-            opacity: 0.8;
-        }
     </style>
-    <script>
-        // 立即重定向到真正的首页
-        window.location.href = '/GameWeb/index.html';
-    </script>
 </head>
 <body>
     <div class="loading">
+        <h2>🎮 游戏正在加载...</h2>
         <div class="spinner"></div>
-        <div class="redirect-text">正在跳转到首页...</div>
-        <div style="font-size: 14px; opacity: 0.6;">
-            如果没有自动跳转，请<a href="/GameWeb/index.html" style="color: #ffb100;">点击这里</a>
-            </div>
+        <p>正在跳转到游戏界面</p>
     </div>
+    
+    <script>
+        // 立即重定向到游戏主页
+        window.location.href = '/GameWeb/index.html';
+    </script>
 </body>
 </html> 

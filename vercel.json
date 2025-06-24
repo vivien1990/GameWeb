@@ -1,0 +1,60 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/GameWeb/index.html"
+    },
+    {
+      "source": "/index.html",
+      "destination": "/GameWeb/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/镜头(.*)/(.*)\\.(mp4|MP4|mov|MOV)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        },
+        {
+          "key": "Content-Type",
+          "value": "video/mp4"
+        }
+      ]
+    },
+    {
+      "source": "/sounds/(.*)\\.(?:mp3|MP3|wav|WAV)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.(?:jpg|jpeg|png|gif|webp)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.(?:js|css)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
+    }
+  ],
+  "functions": {
+    "app/api/**.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
+} 

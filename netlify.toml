@@ -1,0 +1,71 @@
+[build]
+  publish = "."
+  
+[build.environment]
+  NODE_VERSION = "18"
+
+# 视频文件缓存优化
+[[headers]]
+  for = "/镜头*/*.mp4"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    Content-Type = "video/mp4"
+    
+[[headers]]
+  for = "/镜头*/*.MP4"  
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    Content-Type = "video/mp4"
+
+# 音频文件缓存优化
+[[headers]]
+  for = "/sounds/*.MP3"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    Content-Type = "audio/mpeg"
+    
+[[headers]]
+  for = "/sounds/*.mp3"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"  
+    Content-Type = "audio/mpeg"
+
+# 图片文件缓存优化
+[[headers]]
+  for = "**/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    
+[[headers]]
+  for = "**/*.jpg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# CSS/JS文件缓存
+[[headers]]
+  for = "**/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+    
+[[headers]]
+  for = "**/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+# HTML文件缓存
+[[headers]]
+  for = "**/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+# 根目录重定向
+[[redirects]]
+  from = "/"
+  to = "/GameWeb/index.html"
+  status = 301
+
+# 错误页面处理  
+[[redirects]]
+  from = "/*"
+  to = "/GameWeb/index.html"
+  status = 200 
