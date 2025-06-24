@@ -117,11 +117,14 @@ NewGameWeb/
 python -m http.server 8000
 
 # 访问完整故事页面
-http://localhost:8000/index-story.html
+首页：http://localhost:8000/GameWeb/index.html
 
 # 单独测试镜头
-http://localhost:8000/index.html                    # 镜头1
-http://localhost:8000/simple-test-scene2.html       # 镜头2
+ 镜头1：   http://localhost:8000/index.html
+echo    镜头2：   http://localhost:8000/simple-test-scene2.html
+echo    镜头3：   http://localhost:8000/scene3-time-vortex.html
+echo    镜头4：   http://localhost:8000/scene4-new-awakening.html
+echo    镜头5：   http://localhost:8000/scene5-new.html
 ```
 
 ### 2. 基本操作
